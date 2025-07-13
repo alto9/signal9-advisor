@@ -1,0 +1,13 @@
+{
+	"nodes":[
+		{"id":"4595bf6edf0d6b3b","type":"text","text":"Event Receives Asset ID","x":-320,"y":-260,"width":250,"height":60},
+		{"id":"40e917f769892c72","type":"text","text":"Make API calls to retrieve asset foundational data","x":-320,"y":-140,"width":250,"height":60},
+		{"id":"83f40beaf451681d","type":"text","text":"Save the asset data to the database","x":-320,"y":-20,"width":250,"height":60},
+		{"id":"cf05486207f10b84","type":"text","text":"Dispatch Event (analysisNeeded)","x":-320,"y":100,"width":250,"height":60}
+	],
+	"edges":[
+		{"id":"d800720989eb7394","fromNode":"4595bf6edf0d6b3b","fromSide":"bottom","toNode":"40e917f769892c72","toSide":"top"},
+		{"id":"239d5a02fb58448e","fromNode":"40e917f769892c72","fromSide":"bottom","toNode":"83f40beaf451681d","toSide":"top"},
+		{"id":"4afffbb3262059e3","fromNode":"83f40beaf451681d","fromSide":"bottom","toNode":"cf05486207f10b84","toSide":"top"}
+	]
+}

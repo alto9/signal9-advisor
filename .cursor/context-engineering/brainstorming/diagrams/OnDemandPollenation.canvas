@@ -1,0 +1,13 @@
+{
+	"nodes":[
+		{"id":"3eecd08faeb3b78d","type":"text","text":"API examines 'lastPollenationDate'","x":-460,"y":-180,"width":280,"height":60},
+		{"id":"66aba07dfe65e159","type":"text","text":"Dispatch Event (pollenationNeeded)","x":-620,"y":-40,"width":250,"height":60},
+		{"id":"a0edb362a79968e6","x":-280,"y":-40,"width":250,"height":60,"type":"text","text":"Return full Asset profile and metadata"},
+		{"id":"915fef5c9dfbf63b","type":"text","text":"User Requests Asset Profile from the web site","x":-460,"y":-280,"width":280,"height":60}
+	],
+	"edges":[
+		{"id":"2ae37735c0622b8e","fromNode":"3eecd08faeb3b78d","fromSide":"bottom","toNode":"66aba07dfe65e159","toSide":"top","label":"No Date"},
+		{"id":"735a638f3c3cfdaa","fromNode":"915fef5c9dfbf63b","fromSide":"bottom","toNode":"3eecd08faeb3b78d","toSide":"top"},
+		{"id":"2152dc55f882b582","fromNode":"3eecd08faeb3b78d","fromSide":"bottom","toNode":"a0edb362a79968e6","toSide":"top","label":"Has Date"}
+	]
+}
