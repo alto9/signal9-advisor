@@ -18,6 +18,12 @@ describe('Signal9Stack', () => {
     expect(template).toBeDefined();
     expect(stack.vpc).toBeDefined();
     expect(stack.vpc.vpc).toBeDefined();
+    expect(stack.dynamodb).toBeDefined();
+    expect(stack.dynamodb.usersTable).toBeDefined();
+    expect(stack.dynamodb.assetsTable).toBeDefined();
+    expect(stack.dynamodb.financialsTable).toBeDefined();
+    expect(stack.dynamodb.newsTable).toBeDefined();
+    expect(stack.dynamodb.timeSeriesTable).toBeDefined();
   });
 
   test('Stack has proper tags', () => {
