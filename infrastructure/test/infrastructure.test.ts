@@ -16,6 +16,8 @@ describe('Signal9Stack', () => {
     const template = Template.fromStack(stack);
     
     expect(template).toBeDefined();
+    expect(stack.vpc).toBeDefined();
+    expect(stack.vpc.vpc).toBeDefined();
   });
 
   test('Stack has proper tags', () => {
