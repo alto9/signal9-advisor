@@ -48,30 +48,38 @@ describe('DynamoDB Infrastructure', () => {
       TableName: 'Signal9-Assets-dev',
       KeySchema: [
         {
-          AttributeName: 'ticker',
+          AttributeName: 'symbol',
           KeyType: 'HASH'
         }
       ],
       AttributeDefinitions: Match.arrayWith([
         {
-          AttributeName: 'ticker',
+          AttributeName: 'symbol',
           AttributeType: 'S'
         },
         {
-          AttributeName: 'companyName',
+          AttributeName: 'name',
           AttributeType: 'S'
         },
         {
-          AttributeName: 'sector',
+          AttributeName: 'id',
+          AttributeType: 'S'
+        },
+        {
+          AttributeName: 'class',
+          AttributeType: 'S'
+        },
+        {
+          AttributeName: 'exchange',
           AttributeType: 'S'
         }
       ]),
       GlobalSecondaryIndexes: Match.arrayWith([
         {
-          IndexName: 'CompanyNameIndex',
+          IndexName: 'NameIndex',
           KeySchema: [
             {
-              AttributeName: 'companyName',
+              AttributeName: 'name',
               KeyType: 'HASH'
             }
           ],
@@ -80,10 +88,34 @@ describe('DynamoDB Infrastructure', () => {
           }
         },
         {
-          IndexName: 'SectorIndex',
+          IndexName: 'IdIndex',
           KeySchema: [
             {
-              AttributeName: 'sector',
+              AttributeName: 'id',
+              KeyType: 'HASH'
+            }
+          ],
+          Projection: {
+            ProjectionType: 'ALL'
+          }
+        },
+        {
+          IndexName: 'ClassIndex',
+          KeySchema: [
+            {
+              AttributeName: 'class',
+              KeyType: 'HASH'
+            }
+          ],
+          Projection: {
+            ProjectionType: 'ALL'
+          }
+        },
+        {
+          IndexName: 'ExchangeIndex',
+          KeySchema: [
+            {
+              AttributeName: 'exchange',
               KeyType: 'HASH'
             }
           ],
@@ -293,7 +325,7 @@ describe('DynamoDB Infrastructure', () => {
     const assetsTable = Object.values(tables).find(table => 
       table.Properties.TableName === 'Signal9-Assets-dev'
     );
-    expect(assetsTable?.Properties.GlobalSecondaryIndexes).toHaveLength(2);
+    expect(assetsTable?.Properties.GlobalSecondaryIndexes).toHaveLength(4);
 
     const financialsTable = Object.values(tables).find(table => 
       table.Properties.TableName === 'Signal9-Financials-dev'

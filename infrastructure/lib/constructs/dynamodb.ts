@@ -24,28 +24,44 @@ export class DynamoDbConstruct extends Construct {
       partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true
+      },
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
     this.assetsTable = new dynamodb.Table(this, 'AssetsTable', {
       tableName: `Signal9-Assets-${config.stage}`,
-      partitionKey: { name: 'ticker', type: dynamodb.AttributeType.STRING },
+      partitionKey: { name: 'symbol', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true
+      },
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
     this.assetsTable.addGlobalSecondaryIndex({
-      indexName: 'CompanyNameIndex',
-      partitionKey: { name: 'companyName', type: dynamodb.AttributeType.STRING },
+      indexName: 'NameIndex',
+      partitionKey: { name: 'name', type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL
     });
 
     this.assetsTable.addGlobalSecondaryIndex({
-      indexName: 'SectorIndex',
-      partitionKey: { name: 'sector', type: dynamodb.AttributeType.STRING },
+      indexName: 'IdIndex',
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL
+    });
+
+    this.assetsTable.addGlobalSecondaryIndex({
+      indexName: 'ClassIndex',
+      partitionKey: { name: 'class', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL
+    });
+
+    this.assetsTable.addGlobalSecondaryIndex({
+      indexName: 'ExchangeIndex',
+      partitionKey: { name: 'exchange', type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL
     });
 
@@ -55,7 +71,9 @@ export class DynamoDbConstruct extends Construct {
       sortKey: { name: 'reportTypeDate', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true
+      },
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
@@ -72,7 +90,9 @@ export class DynamoDbConstruct extends Construct {
       sortKey: { name: 'timestamp', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true
+      },
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
@@ -95,7 +115,9 @@ export class DynamoDbConstruct extends Construct {
       sortKey: { name: 'timestamp', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true
+      },
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
