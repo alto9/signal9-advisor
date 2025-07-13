@@ -4,6 +4,7 @@ import { EnvironmentConfig } from '../config/environment';
 import { VpcConstruct } from '../constructs/vpc';
 import { DynamoDbConstruct } from '../constructs/dynamodb';
 import { S3Construct } from '../constructs/s3';
+import { ApiGatewayConstruct } from '../constructs/apigateway';
 
 export interface Signal9StackProps extends cdk.StackProps {
   config: EnvironmentConfig;
@@ -13,6 +14,7 @@ export class Signal9Stack extends cdk.Stack {
   public readonly vpc: VpcConstruct;
   public readonly dynamodb: DynamoDbConstruct;
   public readonly s3: S3Construct;
+  public readonly apiGateway: ApiGatewayConstruct;
 
   constructor(scope: Construct, id: string, props: Signal9StackProps) {
     super(scope, id, props);
@@ -28,6 +30,10 @@ export class Signal9Stack extends cdk.Stack {
     });
 
     this.s3 = new S3Construct(this, 'S3', {
+      config
+    });
+
+    this.apiGateway = new ApiGatewayConstruct(this, 'ApiGateway', {
       config
     });
 

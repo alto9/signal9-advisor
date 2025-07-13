@@ -28,6 +28,14 @@ describe('Signal9Stack', () => {
     expect(stack.s3.staticAssetsBucket).toBeDefined();
     expect(stack.s3.apiCacheBucket).toBeDefined();
     expect(stack.s3.backupBucket).toBeDefined();
+    expect(stack.apiGateway).toBeDefined();
+    expect(stack.apiGateway.api).toBeDefined();
+    expect(stack.apiGateway.v1Resource).toBeDefined();
+    expect(stack.apiGateway.usersResource).toBeDefined();
+    expect(stack.apiGateway.assetsResource).toBeDefined();
+    expect(stack.apiGateway.searchResource).toBeDefined();
+    expect(stack.apiGateway.newsResource).toBeDefined();
+    expect(stack.apiGateway.financialsResource).toBeDefined();
   });
 
   test('Stack has proper tags', () => {
