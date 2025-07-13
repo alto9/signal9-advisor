@@ -24,6 +24,10 @@ describe('Signal9Stack', () => {
     expect(stack.dynamodb.financialsTable).toBeDefined();
     expect(stack.dynamodb.newsTable).toBeDefined();
     expect(stack.dynamodb.timeSeriesTable).toBeDefined();
+    expect(stack.s3).toBeDefined();
+    expect(stack.s3.staticAssetsBucket).toBeDefined();
+    expect(stack.s3.apiCacheBucket).toBeDefined();
+    expect(stack.s3.backupBucket).toBeDefined();
   });
 
   test('Stack has proper tags', () => {
