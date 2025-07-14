@@ -10,6 +10,7 @@ export interface LambdaConstructProps {
   config: EnvironmentConfig;
   vpc: ec2.IVpc;
   privateSubnets: ec2.ISubnet[];
+  lambdaSecurityGroup: ec2.ISecurityGroup;
   usersTableName: string;
   assetsTableName: string;
   financialsTableName: string;
@@ -33,6 +34,7 @@ export class LambdaConstruct extends Construct {
       config, 
       vpc, 
       privateSubnets, 
+      lambdaSecurityGroup,
       usersTableName, 
       assetsTableName, 
       financialsTableName, 
@@ -138,6 +140,7 @@ export class LambdaConstruct extends Construct {
       vpcSubnets: {
         subnets: privateSubnets
       },
+      securityGroups: [lambdaSecurityGroup],
       role: this.executionRole,
       environment: {
         ...baseEnvironment,

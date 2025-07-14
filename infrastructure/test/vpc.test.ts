@@ -115,4 +115,118 @@ describe('VPC Infrastructure', () => {
       LogGroupName: '/aws/vpc/flowlogs/test'
     });
   });
+
+  test('Lambda security group is created', () => {
+    template.hasResourceProperties('AWS::EC2::SecurityGroup', {
+      GroupDescription: 'Security group for Lambda functions',
+      SecurityGroupEgress: [
+        {
+          CidrIp: '0.0.0.0/0',
+          Description: 'Allow all outbound traffic by default',
+          IpProtocol: '-1'
+        }
+      ]
+    });
+  });
+
+  test('VPC endpoint security group is created', () => {
+    template.hasResourceProperties('AWS::EC2::SecurityGroup', {
+      GroupDescription: 'Security group for VPC endpoints',
+      SecurityGroupIngress: [
+        {
+          CidrIp: {
+            'Fn::GetAtt': [
+              Match.stringLikeRegexp('.*Signal9Vpc.*'),
+              'CidrBlock'
+            ]
+          },
+          Description: Match.anyValue(),
+          FromPort: 443,
+          IpProtocol: 'tcp',
+          ToPort: 443
+        }
+      ]
+    });
+  });
+
+  test('VPC endpoints are created for AWS services', () => {
+    template.hasResourceProperties('AWS::EC2::VPCEndpoint', {
+      ServiceName: {
+        'Fn::Join': [
+          '',
+          [
+            'com.amazonaws.',
+            { 'Ref': 'AWS::Region' },
+            '.s3'
+          ]
+        ]
+      },
+      VpcEndpointType: 'Gateway'
+    });
+
+    template.hasResourceProperties('AWS::EC2::VPCEndpoint', {
+      ServiceName: {
+        'Fn::Join': [
+          '',
+          [
+            'com.amazonaws.',
+            { 'Ref': 'AWS::Region' },
+            '.dynamodb'
+          ]
+        ]
+      },
+      VpcEndpointType: 'Gateway'
+    });
+
+    template.hasResourceProperties('AWS::EC2::VPCEndpoint', {
+      ServiceName: 'com.amazonaws.us-east-1.secretsmanager',
+      VpcEndpointType: 'Interface'
+    });
+  });
+
+  test('Custom Network ACL is created for private subnets', () => {
+    template.hasResourceProperties('AWS::EC2::NetworkAcl', {
+      Tags: Match.arrayWith([
+        {
+          Key: 'Name',
+          Value: 'Signal9-Private-NACL-dev'
+        }
+      ])
+    });
+  });
+
+  test('Network ACL entries allow required traffic', () => {
+    template.hasResourceProperties('AWS::EC2::NetworkAclEntry', {
+      RuleNumber: 100,
+      CidrBlock: '10.0.0.0/16',
+      RuleAction: 'allow',
+      Protocol: 6,
+      PortRange: {
+        From: 443,
+        To: 443
+      }
+    });
+
+    template.hasResourceProperties('AWS::EC2::NetworkAclEntry', {
+      RuleNumber: 110,
+      CidrBlock: '0.0.0.0/0',
+      RuleAction: 'allow',
+      Protocol: 6,
+      PortRange: {
+        From: 1024,
+        To: 65535
+      }
+    });
+  });
+
+  test('Network ACL is associated with private subnets', () => {
+    template.hasResourceProperties('AWS::EC2::SubnetNetworkAclAssociation', {
+      SubnetId: {
+        Ref: Match.stringLikeRegexp('.*PrivateSubnet.*')
+      },
+      NetworkAclId: {
+        Ref: Match.stringLikeRegexp('.*PrivateNetworkAcl.*')
+      }
+    });
+  });
 });
