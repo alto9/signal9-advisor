@@ -8,6 +8,7 @@ import { ApiGatewayConstruct } from '../constructs/apigateway';
 import { LambdaConstruct } from '../constructs/lambda';
 import { SecretsManagerConstruct } from '../constructs/secrets-manager';
 import { EventBridgeConstruct } from '../constructs/eventbridge';
+import { CloudWatchConstruct } from '../constructs/cloudwatch';
 
 export interface Signal9StackProps extends cdk.StackProps {
   config: EnvironmentConfig;
@@ -21,6 +22,7 @@ export class Signal9Stack extends cdk.Stack {
   public readonly lambda: LambdaConstruct;
   public readonly secretsManager: SecretsManagerConstruct;
   public readonly eventBridge: EventBridgeConstruct;
+  public readonly cloudWatch: CloudWatchConstruct;
 
   constructor(scope: Construct, id: string, props: Signal9StackProps) {
     super(scope, id, props);
@@ -65,6 +67,14 @@ export class Signal9Stack extends cdk.Stack {
 
     // Grant Lambda functions access to secrets
     this.secretsManager.grantSecretsReadAccess(this.lambda.lambdaRole);
+
+    // Create CloudWatch monitoring setup
+    this.cloudWatch = new CloudWatchConstruct(this, 'CloudWatch', {
+      config,
+      api: this.apiGateway.api,
+      lambdaFunctions: [], // TODO: Add lambda functions when they are created
+      vpc: this.vpc.vpc
+    });
 
     cdk.Tags.of(this).add('Project', 'Signal9');
     cdk.Tags.of(this).add('Environment', config.stage);
