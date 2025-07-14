@@ -9,6 +9,7 @@ import { LambdaConstruct } from '../constructs/lambda';
 import { SecretsManagerConstruct } from '../constructs/secrets-manager';
 import { EventBridgeConstruct } from '../constructs/eventbridge';
 import { CloudWatchConstruct } from '../constructs/cloudwatch';
+import { WafConstruct } from '../constructs/waf';
 
 export interface Signal9StackProps extends cdk.StackProps {
   config: EnvironmentConfig;
@@ -23,6 +24,7 @@ export class Signal9Stack extends cdk.Stack {
   public readonly secretsManager: SecretsManagerConstruct;
   public readonly eventBridge: EventBridgeConstruct;
   public readonly cloudWatch: CloudWatchConstruct;
+  public readonly waf: WafConstruct;
 
   constructor(scope: Construct, id: string, props: Signal9StackProps) {
     super(scope, id, props);
@@ -57,6 +59,7 @@ export class Signal9Stack extends cdk.Stack {
       config,
       vpc: this.vpc.vpc,
       privateSubnets: this.vpc.privateSubnets,
+      lambdaSecurityGroup: this.vpc.lambdaSecurityGroup,
       usersTableName: this.dynamodb.usersTable.tableName,
       assetsTableName: this.dynamodb.assetsTable.tableName,
       financialsTableName: this.dynamodb.financialsTable.tableName,
@@ -67,6 +70,12 @@ export class Signal9Stack extends cdk.Stack {
 
     // Grant Lambda functions access to secrets
     this.secretsManager.grantSecretsReadAccess(this.lambda.lambdaRole);
+
+    // Create WAF and associate with API Gateway
+    this.waf = new WafConstruct(this, 'Waf', {
+      config,
+      apiGatewayArn: this.apiGateway.api.deploymentStage.stageArn
+    });
 
     // Create CloudWatch monitoring setup
     this.cloudWatch = new CloudWatchConstruct(this, 'CloudWatch', {

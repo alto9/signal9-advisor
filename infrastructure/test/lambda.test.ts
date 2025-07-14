@@ -239,7 +239,7 @@ describe('Lambda Infrastructure', () => {
 
   test('Resource count matches expected', () => {
     template.resourceCountIs('AWS::Lambda::LayerVersion', 1);
-    template.resourceCountIs('AWS::SQS::Queue', 1);
+    template.resourceCountIs('AWS::SQS::Queue', 3); // DLQ + EventBridge DLQs
     
     const roles = template.findResources('AWS::IAM::Role');
     const lambdaRole = Object.values(roles).find(role => 
