@@ -6,6 +6,7 @@ import { DynamoDbConstruct } from '../constructs/dynamodb';
 import { S3Construct } from '../constructs/s3';
 import { ApiGatewayConstruct } from '../constructs/apigateway';
 import { LambdaConstruct } from '../constructs/lambda';
+import { SecretsManagerConstruct } from '../constructs/secrets-manager';
 
 export interface Signal9StackProps extends cdk.StackProps {
   config: EnvironmentConfig;
@@ -17,6 +18,7 @@ export class Signal9Stack extends cdk.Stack {
   public readonly s3: S3Construct;
   public readonly apiGateway: ApiGatewayConstruct;
   public readonly lambda: LambdaConstruct;
+  public readonly secretsManager: SecretsManagerConstruct;
 
   constructor(scope: Construct, id: string, props: Signal9StackProps) {
     super(scope, id, props);
@@ -35,6 +37,10 @@ export class Signal9Stack extends cdk.Stack {
       config
     });
 
+    this.secretsManager = new SecretsManagerConstruct(this, 'SecretsManager', {
+      config
+    });
+
     this.apiGateway = new ApiGatewayConstruct(this, 'ApiGateway', {
       config
     });
@@ -47,8 +53,12 @@ export class Signal9Stack extends cdk.Stack {
       assetsTableName: this.dynamodb.assetsTable.tableName,
       financialsTableName: this.dynamodb.financialsTable.tableName,
       newsTableName: this.dynamodb.newsTable.tableName,
-      timeSeriesTableName: this.dynamodb.timeSeriesTable.tableName
+      timeSeriesTableName: this.dynamodb.timeSeriesTable.tableName,
+      secretsEnvironment: this.secretsManager.getSecretsEnvironmentVariables()
     });
+
+    // Grant Lambda functions access to secrets
+    this.secretsManager.grantSecretsReadAccess(this.lambda.lambdaRole);
 
     cdk.Tags.of(this).add('Project', 'Signal9');
     cdk.Tags.of(this).add('Environment', config.stage);

@@ -15,18 +15,32 @@ export interface LambdaConstructProps {
   financialsTableName: string;
   newsTableName: string;
   timeSeriesTableName: string;
+  secretsEnvironment?: { [key: string]: string };
+  secretsRole?: iam.Role;
 }
 
 export class LambdaConstruct extends Construct {
   public readonly sharedLayer: lambda.LayerVersion;
   public readonly executionRole: iam.Role;
+  public readonly lambdaRole: iam.Role; // Alias for consistency
   public readonly deadLetterQueue: sqs.Queue;
   public readonly baseLambdaProps: Partial<lambda.FunctionProps>;
 
   constructor(scope: Construct, id: string, props: LambdaConstructProps) {
     super(scope, id);
 
-    const { config, vpc, privateSubnets, usersTableName, assetsTableName, financialsTableName, newsTableName, timeSeriesTableName } = props;
+    const { 
+      config, 
+      vpc, 
+      privateSubnets, 
+      usersTableName, 
+      assetsTableName, 
+      financialsTableName, 
+      newsTableName, 
+      timeSeriesTableName,
+      secretsEnvironment = {},
+      secretsRole
+    } = props;
 
     this.sharedLayer = new lambda.LayerVersion(this, 'SharedLayer', {
       layerVersionName: `Signal9-SharedLayer-${config.stage}`,
@@ -43,6 +57,7 @@ export class LambdaConstruct extends Construct {
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
+    // Always create our own execution role for Lambda functions
     this.executionRole = new iam.Role(this, 'LambdaExecutionRole', {
       roleName: `Signal9-LambdaExecutionRole-${config.stage}`,
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -51,6 +66,22 @@ export class LambdaConstruct extends Construct {
         iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole')
       ]
     });
+
+    // Create alias for consistency
+    this.lambdaRole = this.executionRole;
+
+    // If secrets role is provided, merge its permissions into our execution role
+    if (secretsRole) {
+      // Add the secrets access policy to our execution role
+      this.executionRole.addToPolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          'secretsmanager:GetSecretValue',
+          'secretsmanager:DescribeSecret'
+        ],
+        resources: ['*'] // Will be restricted by the secrets role's policy
+      }));
+    }
 
     this.executionRole.addToPolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
@@ -89,6 +120,17 @@ export class LambdaConstruct extends Construct {
       resources: [this.deadLetterQueue.queueArn]
     }));
 
+    // Merge base environment variables with secrets environment variables
+    const baseEnvironment = {
+      USERS_TABLE: usersTableName,
+      ASSETS_TABLE: assetsTableName,
+      FINANCIALS_TABLE: financialsTableName,
+      NEWS_TABLE: newsTableName,
+      TIMESERIES_TABLE: timeSeriesTableName,
+      DLQ_URL: this.deadLetterQueue.queueUrl,
+      NODE_ENV: config.stage
+    };
+
     this.baseLambdaProps = {
       runtime: lambda.Runtime.NODEJS_18_X,
       layers: [this.sharedLayer],
@@ -98,13 +140,8 @@ export class LambdaConstruct extends Construct {
       },
       role: this.executionRole,
       environment: {
-        USERS_TABLE: usersTableName,
-        ASSETS_TABLE: assetsTableName,
-        FINANCIALS_TABLE: financialsTableName,
-        NEWS_TABLE: newsTableName,
-        TIMESERIES_TABLE: timeSeriesTableName,
-        DLQ_URL: this.deadLetterQueue.queueUrl,
-        NODE_ENV: config.stage
+        ...baseEnvironment,
+        ...secretsEnvironment
       },
       deadLetterQueue: this.deadLetterQueue,
       timeout: cdk.Duration.minutes(5),

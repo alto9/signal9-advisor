@@ -4,11 +4,9 @@
   "description": "Shared utilities and dependencies for Signal9 Lambda functions",
   "main": "index.js",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.0.0",
-    "@aws-sdk/lib-dynamodb": "^3.0.0",
-    "@aws-sdk/client-sqs": "^3.0.0",
-    "uuid": "^9.0.0",
-    "lodash": "^4.17.21"
+    "@aws-sdk/client-secrets-manager": "^3.450.0",
+    "@aws-sdk/client-dynamodb": "^3.450.0",
+    "@aws-sdk/lib-dynamodb": "^3.450.0"
   },
   "engines": {
     "node": ">=18.0.0"
