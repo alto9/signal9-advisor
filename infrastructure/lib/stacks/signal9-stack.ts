@@ -7,6 +7,7 @@ import { S3Construct } from '../constructs/s3';
 import { ApiGatewayConstruct } from '../constructs/apigateway';
 import { LambdaConstruct } from '../constructs/lambda';
 import { SecretsManagerConstruct } from '../constructs/secrets-manager';
+import { EventBridgeConstruct } from '../constructs/eventbridge';
 
 export interface Signal9StackProps extends cdk.StackProps {
   config: EnvironmentConfig;
@@ -19,6 +20,7 @@ export class Signal9Stack extends cdk.Stack {
   public readonly apiGateway: ApiGatewayConstruct;
   public readonly lambda: LambdaConstruct;
   public readonly secretsManager: SecretsManagerConstruct;
+  public readonly eventBridge: EventBridgeConstruct;
 
   constructor(scope: Construct, id: string, props: Signal9StackProps) {
     super(scope, id, props);
@@ -38,6 +40,10 @@ export class Signal9Stack extends cdk.Stack {
     });
 
     this.secretsManager = new SecretsManagerConstruct(this, 'SecretsManager', {
+      config
+    });
+
+    this.eventBridge = new EventBridgeConstruct(this, 'EventBridge', {
       config
     });
 
