@@ -36,6 +36,11 @@ describe('Signal9Stack', () => {
     expect(stack.apiGateway.searchResource).toBeDefined();
     expect(stack.apiGateway.newsResource).toBeDefined();
     expect(stack.apiGateway.financialsResource).toBeDefined();
+    expect(stack.lambda).toBeDefined();
+    expect(stack.lambda.sharedLayer).toBeDefined();
+    expect(stack.lambda.executionRole).toBeDefined();
+    expect(stack.lambda.deadLetterQueue).toBeDefined();
+    expect(stack.lambda.baseLambdaProps).toBeDefined();
   });
 
   test('Stack has proper tags', () => {
