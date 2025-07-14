@@ -449,7 +449,7 @@ const dashboard = new cloudwatch.Dashboard(this, 'Signal9Dashboard', {
 
 ---
 
-### 10. WAF & Security Configuration
+### 10. WAF & Security Configuration: DONE
 **Description:** Set up AWS WAF for API Gateway protection and configure security groups and NACLs.
 
 **Technical Steps:**
