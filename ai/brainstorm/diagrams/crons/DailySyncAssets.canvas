@@ -1,0 +1,13 @@
+{
+	"nodes":[
+		{"id":"b3c64255e03ad5d8","type":"text","text":"Event: Daily at 4:00 am","x":-420,"y":-300,"width":250,"height":60},
+		{"id":"e6cf4efb89e897d1","type":"text","text":"Lambda: SyncAssets","x":-420,"y":-200,"width":250,"height":60},
+		{"id":"f4b42f1b63fc7ceb","type":"text","text":"Alpaca API: /v2/assets","x":-240,"y":-100,"width":250,"height":60},
+		{"id":"71833cf6b4b5e4c1","type":"text","text":"Sync assets with signal9 assets table.","x":-240,"y":20,"width":250,"height":60}
+	],
+	"edges":[
+		{"id":"70e7b23175b447b5","fromNode":"b3c64255e03ad5d8","fromSide":"bottom","toNode":"e6cf4efb89e897d1","toSide":"top"},
+		{"id":"ee8079c25556ee1a","fromNode":"e6cf4efb89e897d1","fromSide":"bottom","toNode":"f4b42f1b63fc7ceb","toSide":"left"},
+		{"id":"5ab9d98abcd7b733","fromNode":"f4b42f1b63fc7ceb","fromSide":"bottom","toNode":"71833cf6b4b5e4c1","toSide":"top"}
+	]
+}

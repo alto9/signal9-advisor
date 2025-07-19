@@ -1,0 +1,33 @@
+{
+	"nodes":[
+		{"id":"bf101d30b8a85081","type":"group","x":-840,"y":-200,"width":290,"height":410,"label":"Remote Data"},
+		{"id":"dd12b3fdda5ac5f5","type":"text","text":"API: AlphaVantage","x":-440,"y":-28,"width":250,"height":60},
+		{"id":"aed4e1cdd7ca3538","type":"text","text":"COMPANY OVERVIEW","x":-820,"y":-180,"width":250,"height":50},
+		{"id":"bb42d4eca1592b33","type":"text","text":"EARNINGS","x":-820,"y":-118,"width":250,"height":50},
+		{"id":"db7e619f670eb0b5","type":"text","text":"CASH FLOW","x":-820,"y":-56,"width":250,"height":50},
+		{"id":"853e9c0133faacc8","type":"text","text":"BALANCE SHEET","x":-820,"y":6,"width":250,"height":50},
+		{"id":"df7c060a965c7302","type":"text","text":"INCOME STATEMENT","x":-820,"y":68,"width":250,"height":50},
+		{"id":"f74e1b4d5566b20c","type":"text","text":"EVENT: pollenationNeeded","x":-60,"y":-300,"width":250,"height":50},
+		{"id":"bfb0962a8c0727a9","type":"text","text":"Call AlphaVantage API endpoints to grab foundational data","x":-60,"y":-62,"width":250,"height":118},
+		{"id":"12178d6431e43e90","type":"text","text":"Lambda: PollenateAsset","x":-60,"y":-190,"width":250,"height":60},
+		{"id":"c10b9ddec07d7a4d","type":"text","text":"For each Asset response, upsert the data in the foundational data tables and then trigger an event stating that analysis is ready for this Asset.","x":-60,"y":119,"width":250,"height":181},
+		{"id":"162432e0c0d9a298","type":"text","text":"Foundational Data Tables","x":320,"y":118,"width":250,"height":60},
+		{"id":"cded202f879e039b","type":"text","text":"EVENT: analysisNeeded","x":320,"y":240,"width":250,"height":60},
+		{"id":"8d075ce7b75efbd5","type":"text","text":"NEWS SENTIMENT","x":-500,"y":270,"width":250,"height":50},
+		{"id":"63516ce7a6e889de","type":"text","text":"EARNINGS CALL SCRIPTS","x":-820,"y":128,"width":250,"height":50}
+	],
+	"edges":[
+		{"id":"a94ffce2a14a4dc1","fromNode":"bfb0962a8c0727a9","fromSide":"bottom","toNode":"c10b9ddec07d7a4d","toSide":"top"},
+		{"id":"d82e642ebe6a42b7","fromNode":"f74e1b4d5566b20c","fromSide":"bottom","toNode":"12178d6431e43e90","toSide":"top"},
+		{"id":"81f58c2e0a89246f","fromNode":"bfb0962a8c0727a9","fromSide":"left","toNode":"dd12b3fdda5ac5f5","toSide":"right","fromEnd":"arrow","label":"HTTPS"},
+		{"id":"160c791f2a9b5007","fromNode":"aed4e1cdd7ca3538","fromSide":"right","toNode":"dd12b3fdda5ac5f5","toSide":"left"},
+		{"id":"399f9bc0ca3d09ae","fromNode":"bb42d4eca1592b33","fromSide":"right","toNode":"dd12b3fdda5ac5f5","toSide":"left"},
+		{"id":"4851953a4aa53205","fromNode":"db7e619f670eb0b5","fromSide":"right","toNode":"dd12b3fdda5ac5f5","toSide":"left"},
+		{"id":"4aaa2a1f6ad49c94","fromNode":"853e9c0133faacc8","fromSide":"right","toNode":"dd12b3fdda5ac5f5","toSide":"left"},
+		{"id":"d4a5df1b1ec301ab","fromNode":"df7c060a965c7302","fromSide":"right","toNode":"dd12b3fdda5ac5f5","toSide":"left"},
+		{"id":"ff386af5127f5bb2","fromNode":"63516ce7a6e889de","fromSide":"right","toNode":"dd12b3fdda5ac5f5","toSide":"left"},
+		{"id":"a2c0f2170c41e2c1","fromNode":"12178d6431e43e90","fromSide":"bottom","toNode":"bfb0962a8c0727a9","toSide":"top"},
+		{"id":"6c797bc2a16bf162","fromNode":"c10b9ddec07d7a4d","fromSide":"right","toNode":"162432e0c0d9a298","toSide":"left"},
+		{"id":"a45aa02774e7a62b","fromNode":"c10b9ddec07d7a4d","fromSide":"right","toNode":"cded202f879e039b","toSide":"left"}
+	]
+}

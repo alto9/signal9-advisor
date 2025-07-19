@@ -10,6 +10,7 @@ import { SecretsManagerConstruct } from '../constructs/secrets-manager';
 import { EventBridgeConstruct } from '../constructs/eventbridge';
 import { CloudWatchConstruct } from '../constructs/cloudwatch';
 import { WafConstruct } from '../constructs/waf';
+import { CloudFrontConstruct } from '../constructs/cloudfront';
 
 export interface Signal9StackProps extends cdk.StackProps {
   config: EnvironmentConfig;
@@ -25,6 +26,7 @@ export class Signal9Stack extends cdk.Stack {
   public readonly eventBridge: EventBridgeConstruct;
   public readonly cloudWatch: CloudWatchConstruct;
   public readonly waf: WafConstruct;
+  public readonly cloudFront: CloudFrontConstruct;
 
   constructor(scope: Construct, id: string, props: Signal9StackProps) {
     super(scope, id, props);
@@ -53,6 +55,15 @@ export class Signal9Stack extends cdk.Stack {
 
     this.apiGateway = new ApiGatewayConstruct(this, 'ApiGateway', {
       config
+    });
+
+    // Add CloudFront distribution
+    this.cloudFront = new CloudFrontConstruct(this, 'CloudFront', {
+      config,
+      staticAssetsBucket: this.s3.staticAssetsBucket,
+      api: this.apiGateway.api,
+      certificateArn: config.certificateArn,
+      testMode: process.env.NODE_ENV === 'test',
     });
 
     this.lambda = new LambdaConstruct(this, 'Lambda', {
