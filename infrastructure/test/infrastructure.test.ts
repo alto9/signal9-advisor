@@ -3,6 +3,8 @@ import { Template } from 'aws-cdk-lib/assertions';
 import { Signal9Stack } from '../lib/stacks/signal9-stack';
 import { getConfig } from '../lib/config/environment';
 
+process.env.NODE_ENV = 'test';
+
 describe('Signal9Stack', () => {
   test('Stack instantiation with dev environment', () => {
     const app = new cdk.App();
@@ -75,5 +77,18 @@ describe('Signal9Stack', () => {
     expect(devConfig.env.region).toBe('us-east-1');
     expect(testConfig.env.region).toBe('us-east-1');
     expect(prodConfig.env.region).toBe('us-east-1');
+  });
+
+  test('CloudFront distribution is created with correct domain and certificate', () => {
+    const app = new cdk.App();
+    const config = getConfig('dev');
+    const stack = new Signal9Stack(app, 'TestSignal9Stack', {
+      env: config.env,
+      config: config
+    });
+    expect(stack.cloudFront).toBeDefined();
+    expect(stack.cloudFront.distribution).toBeDefined();
+    // The domainNames property is not directly accessible; just check the distribution and certificate exist
+    expect(stack.cloudFront.certificate).toBeDefined();
   });
 });

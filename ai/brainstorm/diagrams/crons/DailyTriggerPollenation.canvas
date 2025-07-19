@@ -1,0 +1,15 @@
+{
+	"nodes":[
+		{"id":"5e48d0c3cfcf1526","type":"text","text":"Search for set of Assets with highest volume, and oldest 'lastPollenationDate'","x":-360,"y":23,"width":250,"height":100},
+		{"id":"2bffdb7af6fe01a8","type":"text","text":"For each asset returned, dispatch a pollenationNeeded event","x":-360,"y":160,"width":250,"height":100},
+		{"id":"b872d8a5c43be018","type":"text","text":"Table: assets","x":-680,"y":43,"width":250,"height":60},
+		{"id":"12178d6431e43e90","type":"text","text":"Lambda: TriggerPollenation","x":-360,"y":-100,"width":250,"height":80},
+		{"id":"f74e1b4d5566b20c","type":"text","text":"Event: Daily at 7:00 AM","x":-360,"y":-200,"width":250,"height":50}
+	],
+	"edges":[
+		{"id":"d82e642ebe6a42b7","fromNode":"f74e1b4d5566b20c","fromSide":"bottom","toNode":"12178d6431e43e90","toSide":"top"},
+		{"id":"e030f65309efa498","fromNode":"12178d6431e43e90","fromSide":"bottom","toNode":"5e48d0c3cfcf1526","toSide":"top"},
+		{"id":"286f747035ab5385","fromNode":"5e48d0c3cfcf1526","fromSide":"left","toNode":"b872d8a5c43be018","toSide":"right"},
+		{"id":"62ae789c9a75161a","fromNode":"5e48d0c3cfcf1526","fromSide":"bottom","toNode":"2bffdb7af6fe01a8","toSide":"top"}
+	]
+}
