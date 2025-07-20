@@ -120,9 +120,6 @@
 - Relationships: Many-to-one with users
 - Constraints: User ownership, preference validation
 
-**User Alerts Table**:
-- *Note: Alert functionality removed from MVP scope - will be added in future phases*
-
 **News Table**:
 - Attributes: news_id (PK), time_published (SK), asset_symbol, title, url, relevance_score, related_assets, source, summary, last_sync_timestamp, created_at, updated_at, news_category, market_impact
 - Relationships: Many-to-many with assets (news can mention multiple assets)
@@ -133,9 +130,6 @@
 - Attributes: calendar_id (PK), asset_id (FK), earnings_date, report_time (pre-market/post-market), estimated_eps, actual_eps, surprise, surprise_percentage, created_at, updated_at, is_processed
 - Relationships: Many-to-one with assets
 - Constraints: Unique earnings per asset per date, date validation
-
-**Analysis Queue Table**:
-- *Note: Queue functionality removed - analysis is handled via EventBridge events and Step Functions orchestration*
 
 **Financial Data Tables**:
 - **Income Statement Table**: income_statement (PK), asset_id (FK), fiscal_date_ending, revenue, net_income, etc.
@@ -155,12 +149,6 @@
 - Attributes: comparison_id (PK), asset_id (FK), sector_rankings_json, valuation_comparison_json, growth_comparison_json, competitive_analysis_json, last_updated
 - Relationships: Many-to-one with assets
 - Constraints: Data validation, sector consistency
-
-**Daily Briefing Cache Table**:
-- *Note: Caching removed from MVP scope - daily briefing data is queried directly from source tables*
-
-**Asset Profile Cache Table**:
-- *Note: Caching removed from MVP scope - asset profile data is pre-computed and stored in asset_analysis table*
 
 **Storage Solutions**:
 - **Primary Storage**: DynamoDB for all structured data with auto-scaling
@@ -221,9 +209,6 @@
 - `GET /analysis/financial-health/{symbol}` - Get financial health analysis
 - `GET /analysis/earnings-quality/{symbol}` - Get earnings quality assessment
 - `GET /analysis/valuation/{symbol}` - Get valuation models and fair value estimates
-
-**Alert and Notification Endpoints**:
-- *Note: Alert functionality removed from MVP scope - will be added in future phases*
 
 **Data Visualization Endpoints**:
 - `GET /charts/{symbol}/price` - Get price chart data
@@ -603,18 +588,9 @@ Event-Driven: earningsProcessed → markEarningsProcessed → Update EarningsCal
 
 **Asset Profile UI Requirements**:
 - **Tabbed Interface**: 10 analysis components in organized tabs
-- **Interactive Charts**: Zoom, pan, and customize chart views
 - **Data Tables**: Sortable and filterable data tables with export capabilities
 - **Comparison Tools**: Side-by-side asset comparison functionality
-- **Alert Management**: Inline alert creation and management
 - **Print/Export**: PDF generation and data export capabilities
-
-**Data Visualization Requirements**:
-- **Chart Types**: Line charts, candlestick charts, heat maps, radar charts, bar charts
-- **Interactive Features**: Tooltips, zoom, pan, time range selection
-- **Real-time Data**: Live price updates and indicator calculations
-- **Performance**: Smooth 60fps animations, efficient data rendering
-- **Mobile Optimization**: Touch-friendly interactions and responsive layouts
 
 **User Experience Requirements**:
 - **Navigation**: Intuitive breadcrumb navigation and search functionality
