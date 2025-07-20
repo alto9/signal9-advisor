@@ -9,12 +9,12 @@ flowchart TD
     B --> C[Initialize Analysis<br/>State: Initialize<br/>Extracts: asset_symbol, analysis_id, timestamp]
     C --> D[Load Asset Data<br/>State: LoadAssetData<br/>Lambda: LoadAssetData<br/>Queries: signal9_assets table<br/>Gets: symbol, name, sector, market_cap, status]
     D --> E[Load Financial Data<br/>State: LoadFinancialData<br/>Lambda: LoadFinancialData<br/>Queries: companyOverview, earnings, incomeStatement,<br/>balanceSheet, cashFlow tables<br/>Gets: P/E ratios, revenue, debt, cash flow, EPS]
-    E --> F[Load News Sentiment<br/>State: LoadNewsSentiment<br/>Lambda: LoadNewsSentiment<br/>Queries: newsSentiment table<br/>Gets: Last 30 days sentiment scores,<br/>news articles, relevance scores]
+    E --> F[Load News Sentiment<br/>State: LoadNewsSentiment<br/>Lambda: LoadNewsSentiment<br/>Queries: signal9_news table<br/>Gets: Last 30 days sentiment scores,<br/>news articles, relevance scores]
     
     F --> G[Data Preprocessing<br/>State: PreprocessData<br/>Lambda: DataProcessor<br/>Calculates: Financial ratios, validates data,<br/>normalizes time series, handles missing values]
     G --> H[Parallel Processing<br/>State: ParallelAnalysis<br/>Executes 4 analysis branches concurrently]
     
-    H --> I[Sentiment Analysis<br/>State: SentimentAnalysis<br/>Amazon Comprehend<br/>Processes: News articles for sentiment scores,<br/>key phrases, entity recognition]
+    H --> I[Sentiment Aggregation<br/>State: SentimentAggregation<br/>Lambda: SentimentAggregator<br/>Processes: Pre-analyzed sentiment data<br/>Calculates: Weighted sentiment score, trend analysis,<br/>relevance-weighted aggregation]
     H --> J[Financial Health<br/>State: FinancialHealth<br/>SageMaker Endpoint<br/>Analyzes: Liquidity ratios, solvency metrics,<br/>profitability indicators, cash flow stability]
     H --> K[Risk Assessment<br/>State: RiskAssessment<br/>SageMaker Endpoint<br/>Evaluates: Volatility, debt levels, market position,<br/>sector-specific risks, earnings consistency]
     H --> L[Peer Comparison<br/>State: PeerComparison<br/>Lambda: PeerAnalyzer<br/>Queries: signal9_assets table for sector peers<br/>Compares: P/E, P/B, ROE, ROA, growth rates]
@@ -98,14 +98,14 @@ flowchart TD
 
 #### **LoadNewsSentiment Lambda**
 - **Purpose**: Retrieves recent news sentiment data for market analysis
-- **Queries**: `newsSentiment` table with time-based filtering
+- **Queries**: `signal9_news` table with time-based filtering
 - **Data Retrieved**:
   - News articles from last 30 days
-  - Sentiment scores (positive/negative/neutral)
+  - Pre-analyzed sentiment scores (overall_sentiment_score, overall_sentiment_label)
+  - Ticker-specific sentiment data (ticker_sentiment array)
   - Relevance scores for asset association
-  - Key phrases and entity recognition
   - News source and publication dates
-- **Use Case**: Provides market sentiment context for investment rating
+- **Use Case**: Provides pre-analyzed sentiment data for aggregation
 
 ### **Data Processing Lambda Functions**
 
@@ -124,7 +124,26 @@ flowchart TD
     - Revenue growth rates
     - Earnings trend analysis
     - Cash flow stability metrics
-- **Output**: Clean, validated dataset ready for AI analysis
+- **Output**: Clean, validated dataset ready for rule-based analysis
+
+#### **SentimentAggregator Lambda**
+- **Purpose**: Processes pre-analyzed sentiment data to generate aggregate sentiment scores
+- **Input**: News sentiment data from `signal9_news` table
+- **Processing Logic**:
+  - **Time Window**: Last 20-30 news articles (configurable)
+  - **Relevance Weighting**: Higher weight for articles with higher relevance_score
+  - **Recency Weighting**: More recent articles weighted higher
+  - **Ticker-Specific Focus**: Prioritizes articles with ticker_sentiment data for the asset
+  - **Sentiment Score Aggregation**:
+    - Weighted average of overall_sentiment_score
+    - Sentiment trend analysis (improving/worsening)
+    - Sentiment volatility calculation
+    - Sentiment distribution analysis (bullish/bearish/neutral mix)
+- **Output**: 
+  - Aggregate sentiment score (-1.0 to 1.0)
+  - Sentiment trend indicator (improving, stable, worsening)
+  - Sentiment confidence score
+  - Key sentiment drivers and themes
 
 #### **PeerAnalyzer Lambda**
 - **Purpose**: Compares asset against sector peers for competitive analysis
@@ -146,21 +165,13 @@ flowchart TD
   - **Executive Summary**: Key findings and investment rating
   - **Financial Health Analysis**: Balance sheet and cash flow assessment
   - **Risk Assessment**: Risk factors and mitigation strategies
+  - **Sentiment Analysis**: Market sentiment trends and drivers
   - **Peer Comparison**: Competitive positioning analysis
   - **Investment Rating**: 1-5 scale with detailed reasoning
   - **Key Metrics Dashboard**: Summary of critical financial ratios
 - **Output**: Structured JSON report for storage and display
 
 ### **AI/ML Services**
-
-#### **Amazon Comprehend (Sentiment Analysis)**
-- **Input**: News articles and financial text
-- **Processing**:
-  - **Sentiment Detection**: Positive/negative/neutral classification
-  - **Key Phrase Extraction**: Identifies important terms and concepts
-  - **Entity Recognition**: Detects company names, financial terms
-  - **Targeted Sentiment**: Sentiment analysis for specific entities
-- **Output**: Structured sentiment data with confidence scores
 
 #### **SageMaker Financial Health Endpoint**
 - **Model Type**: Custom XGBoost model
@@ -246,20 +257,15 @@ This Step Functions architecture provides a robust, scalable, and maintainable s
 | LoadFinancialData | 1GB | 5s | $0.20 | $0.000002 |
 | LoadNewsSentiment | 512MB | 3s | $0.20 | $0.0000006 |
 | DataProcessor | 2GB | 10s | $0.20 | $0.000004 |
+| SentimentAggregator | 512MB | 5s | $0.20 | $0.000002 |
 | PeerAnalyzer | 1GB | 8s | $0.20 | $0.0000032 |
 | ReportGenerator | 1GB | 5s | $0.20 | $0.000002 |
-| **Lambda Total** | | | | **$0.0000132** |
+| **Lambda Total** | | | | **$0.0000152** |
 
 #### **AWS Step Functions**
 - **State Transitions**: 15 transitions per run
 - **Cost per 1M transitions**: $25.00
 - **Cost per run**: $0.000375
-
-#### **Amazon Comprehend**
-- **Sentiment Analysis**: $0.0001 per unit (100 characters)
-- **Average news articles**: 500 characters per article
-- **Articles per asset**: 50 articles (30 days)
-- **Cost per run**: $0.0025
 
 #### **Amazon SageMaker**
 - **Financial Health Endpoint**: $0.000065 per inference
@@ -290,15 +296,14 @@ This Step Functions architecture provides a robust, scalable, and maintainable s
 ### **Total Cost Per Analysis Run**
 | Component | Cost per Run |
 |-----------|--------------|
-| Lambda Functions | $0.0000132 |
+| Lambda Functions | $0.0000152 |
 | Step Functions | $0.000375 |
-| Amazon Comprehend | $0.0025 |
 | SageMaker Endpoints | $0.00013 |
 | Amazon Bedrock | $0.054 |
 | DynamoDB | $0.0000625 |
 | EventBridge | $0.000001 |
 | CloudWatch & X-Ray | $0.0001 |
-| **Total per Run** | **$0.057** |
+| **Total per Run** | **$0.055** |
 
 ### **AlphaVantage Rate Limit Analysis**
 
@@ -335,22 +340,21 @@ This Step Functions architecture provides a robust, scalable, and maintainable s
 #### **Daily Cost Scenarios**
 | Analyses per Day | Daily Cost | Monthly Cost | Annual Cost |
 |------------------|------------|--------------|-------------|
-| 1 | $0.057 | $1.71 | $20.52 |
-| 2 | $0.114 | $3.42 | $41.04 |
-| 3 (Max Capacity) | $0.171 | $5.13 | $61.56 |
+| 1 | $0.055 | $1.65 | $19.80 |
+| 2 | $0.110 | $3.30 | $39.60 |
+| 3 (Max Capacity) | $0.165 | $4.95 | $59.40 |
 
 #### **Monthly Cost Breakdown (3 analyses/day)**
 | Component | Cost per Run | Daily Cost | Monthly Cost |
 |-----------|--------------|------------|--------------|
-| Lambda Functions | $0.0000132 | $0.00004 | $0.001 |
+| Lambda Functions | $0.0000152 | $0.00005 | $0.001 |
 | Step Functions | $0.000375 | $0.001 | $0.034 |
-| Amazon Comprehend | $0.0025 | $0.008 | $0.225 |
 | SageMaker Endpoints | $0.00013 | $0.0004 | $0.012 |
 | Amazon Bedrock | $0.054 | $0.162 | $4.86 |
 | DynamoDB | $0.0000625 | $0.0002 | $0.006 |
 | EventBridge | $0.000001 | $0.000003 | $0.00009 |
 | CloudWatch & X-Ray | $0.0001 | $0.0003 | $0.009 |
-| **Total** | **$0.057** | **$0.171** | **$5.13** |
+| **Total** | **$0.055** | **$0.165** | **$4.95** |
 
 ### **Cost Optimization Strategies**
 
@@ -358,55 +362,55 @@ This Step Functions architecture provides a robust, scalable, and maintainable s
 - **Current**: Individual asset analysis
 - **Optimized**: Batch 8 assets per Step Functions execution
 - **Cost Reduction**: 60% reduction in Step Functions costs
-- **New cost per run**: $0.023 (vs $0.057)
+- **New cost per run**: $0.022 (vs $0.055)
 
 #### **2. SageMaker Endpoint Optimization**
 - **Current**: Dedicated endpoints per model
 - **Optimized**: Multi-model endpoints
 - **Cost Reduction**: 40% reduction in SageMaker costs
-- **New cost per run**: $0.034 (vs $0.057)
+- **New cost per run**: $0.033 (vs $0.055)
 
 #### **3. Bedrock Token Optimization**
 - **Current**: Full context window usage
 - **Optimized**: Compressed prompts and selective data inclusion
 - **Cost Reduction**: 30% reduction in Bedrock costs
-- **New cost per run**: $0.040 (vs $0.057)
+- **New cost per run**: $0.039 (vs $0.055)
 
 #### **4. DynamoDB Optimization**
 - **Current**: On-demand pricing
 - **Optimized**: Provisioned capacity for predictable workloads
 - **Cost Reduction**: 50% reduction in DynamoDB costs
-- **New cost per run**: $0.054 (vs $0.057)
+- **New cost per run**: $0.052 (vs $0.055)
 
 ### **Optimized Cost Projections**
 
 #### **Optimized Daily Cost Scenarios**
 | Analyses per Day | Optimized Daily Cost | Optimized Monthly Cost | Optimized Annual Cost |
 |------------------|---------------------|------------------------|----------------------|
-| 1 | $0.040 | $1.20 | $14.40 |
-| 2 | $0.080 | $2.40 | $28.80 |
-| 3 (Max Capacity) | $0.120 | $3.60 | $43.20 |
+| 1 | $0.039 | $1.17 | $14.04 |
+| 2 | $0.078 | $2.34 | $28.08 |
+| 3 (Max Capacity) | $0.117 | $3.51 | $42.12 |
 
 ### **Production Recommendations**
 
 #### **Phase 1: Development/Testing (First 3 months)**
 - **Target**: 1 analysis per day
-- **Monthly Cost**: $1.20 - $1.71
+- **Monthly Cost**: $1.17 - $1.65
 - **Focus**: System validation and optimization
 
 #### **Phase 2: Beta Launch (Months 4-6)**
 - **Target**: 2 analyses per day
-- **Monthly Cost**: $2.40 - $3.42
+- **Monthly Cost**: $2.34 - $3.30
 - **Focus**: User feedback and performance tuning
 
 #### **Phase 3: Production Scale (Month 7+)**
 - **Target**: 3 analyses per day (max capacity)
-- **Monthly Cost**: $3.60 - $5.13
+- **Monthly Cost**: $3.51 - $4.95
 - **Focus**: Full production deployment within free tier limits
 
 #### **Phase 4: Paid Tier Scale (Future)**
 - **Target**: 10+ analyses per day (requires AlphaVantage paid plan)
-- **Monthly Cost**: $12.00+ (plus AlphaVantage subscription)
+- **Monthly Cost**: $11.70+ (plus AlphaVantage subscription)
 - **Focus**: Scale beyond free tier limitations
 
 ### **Rate Limit Management**
@@ -429,4 +433,4 @@ This Step Functions architecture provides a robust, scalable, and maintainable s
 - **Max Retries**: 3 attempts
 - **Rate Limit Buffer**: 20% of daily limit reserved for retries
 
-This cost analysis shows that the analysis workflow is highly cost-effective, with the main cost driver being Amazon Bedrock for AI-generated investment ratings. However, the AlphaVantage free tier severely limits capacity to only 3 analyses per day. The system can handle meaningful development and testing within these constraints, with monthly costs ranging from $1.20 to $5.13. For production scale, an AlphaVantage paid subscription would be required to increase the daily API call limit. 
+This cost analysis shows that the analysis workflow is highly cost-effective, with the main cost driver being Amazon Bedrock for AI-generated investment ratings. The removal of Amazon Comprehend reduces costs by approximately $0.0025 per run while maintaining comprehensive sentiment analysis through rule-based aggregation of pre-analyzed data. The AlphaVantage free tier limits capacity to 3 analyses per day, but the system can handle meaningful development and testing within these constraints, with monthly costs ranging from $1.17 to $4.95. For production scale, an AlphaVantage paid subscription would be required to increase the daily API call limit. 

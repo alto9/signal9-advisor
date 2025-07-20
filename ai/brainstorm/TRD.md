@@ -294,7 +294,7 @@
 - **Tools**: Artillery for load testing, AWS X-Ray for performance monitoring
 
 **Rule-Based Analysis Testing**:
-- **Component Testing**: Individual testing of financial health, risk assessment, sentiment analysis, and peer comparison models
+- **Component Testing**: Individual testing of financial health, risk assessment, sentiment aggregation, and peer comparison models
 - **Integration Testing**: End-to-end testing of complete rule-based analysis pipeline
 - **Rule Validation**: Verify mathematical accuracy and logical consistency of rule calculations
 - **Performance Testing**: Ensure analysis generation meets performance requirements
@@ -475,7 +475,7 @@
 
 **Data Pipeline**:
 - **Alpha Vantage Integration**: Daily data ingestion with error handling
-- **AI Analysis Pipeline**: Automated processing of financial data
+- **Rule-Based Analysis Pipeline**: Automated processing of financial data
 - **Data Quality Checks**: Validation of incoming financial data
 - **Monitoring**: Pipeline health monitoring and alerting
 
@@ -551,17 +551,17 @@
 - **Validation**: Financial data completeness, numeric ranges, date consistency
 
 **analysisNeeded Event Handler**:
-- **Purpose**: Generate AI analysis for individual assets
+- **Purpose**: Generate rule-based analysis for individual assets
 - **Trigger**: Event-driven (from pollenationNeeded events)
 - **Process**:
-  - Load AI models (sentiment analysis, financial analysis, risk assessment, peer comparison)
-  - Process financial data through AI analysis engine
-  - Generate comprehensive AI analysis and ratings
+  - Load analysis models (sentiment aggregation, financial analysis, risk assessment, peer comparison)
+  - Process financial data through rule-based analysis engine
+- Generate comprehensive rule-based analysis and ratings
   - Update asset analysis table with results
   - Mark analysis as completed
   - Dispatch `analysisComplete` events
-- **Output**: AI-generated ratings and analysis
-- **Validation**: AI model output ranges, confidence scores, required fields
+- **Output**: Rule-based ratings and analysis
+- **Validation**: Analysis model output ranges, confidence scores, required fields
 
 **earningsProcessed Event Handler**:
 - **Purpose**: Mark earnings as processed to prevent duplicate processing
@@ -641,7 +641,7 @@ Event-Driven: earningsProcessed → markEarningsProcessed → Update EarningsCal
 ### Queue-Based Processing Architecture
 
 **Queue Management**:
-- **Analysis Queue**: DynamoDB table for pending AI analysis items
+- **Analysis Queue**: DynamoDB table for pending rule-based analysis items
 - **Priority System**: High-volume assets and older data get priority
 - **Status Tracking**: pending, processing, completed, failed, retry
 - **Retry Logic**: Exponential backoff with max 3 retries
@@ -650,14 +650,14 @@ Event-Driven: earningsProcessed → markEarningsProcessed → Update EarningsCal
 ```
 Daily 5:00 AM: Asset Sync → Alpaca API → Assets Table
 Daily 6:00 AM: Data Pollination → Alpha Vantage APIs → Foundational Data → Queue for Analysis
-Hourly: AI Processing → Retrieve Queue → Batch Processing → AI Analysis → Update Results
+Hourly: Rule-Based Processing → Retrieve Queue → Batch Processing → Rule-Based Analysis → Update Results
 ```
 
 **Batch Processing Strategy**:
 - **Batch Size**: 8 assets per Lambda execution
 - **Grouping**: By industry for better AI context
 - **Model Loading**: Once per batch to reduce overhead
-- **Memory Usage**: 4GB Lambda with AI model caching
+- **Memory Usage**: 4GB Lambda with analysis model caching
 
 **Error Handling**:
 - **Queue Item Status**: Track processing state and error messages

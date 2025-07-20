@@ -38,7 +38,7 @@ The platform is built on a robust, event-driven architecture that efficiently pr
 **Focus**: Implement rule-based analysis capabilities and user management systems
 
 **Key Components**:
-- **Rule-Based Analysis Engine**: 6 analysis models (Investment Rating, Financial Health, Risk Assessment, Market Analysis, Peer Comparison, Technical Analysis)
+- **Rule-Based Analysis Engine**: 6 analysis models (Investment Rating, Financial Health, Risk Assessment, Sentiment Aggregation, Peer Comparison, Technical Analysis)
 - **User Management**: Auth0 authentication, profiles, and preferences
 - **Watchlist Management**: Multi-watchlist support with personalized asset tracking
 - **Search and Discovery**: Advanced asset search with semantic capabilities
@@ -201,7 +201,7 @@ The system uses a sophisticated event-driven architecture with multiple schedule
 | Phase | Duration | Focus | Key Deliverables |
 |-------|----------|-------|------------------|
 | 1 | Weeks 1-4 | Infrastructure & Data Pipeline | Event-driven architecture, data ingestion, monitoring |
-| 2 | Weeks 5-8 | AI Engine & User Management | AI analysis, user system, watchlists |
+| 2 | Weeks 5-8 | Rule-Based Engine & User Management | Rule-based analysis, user system, watchlists |
 | 3 | Weeks 9-12 | Analytics & Personalization | Daily briefings, advanced analytics, mobile |
 | 4 | Weeks 13-16 | Production & Optimization | Live deployment, optimization, scaling |
 
