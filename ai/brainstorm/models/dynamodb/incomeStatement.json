@@ -1,0 +1,165 @@
+{
+  "TableName": "incomeStatement",
+  "Description": "DynamoDB table for storing income statement data from AlphaVantage API",
+  "KeySchema": [
+    {
+      "AttributeName": "symbol",
+      "KeyType": "HASH"
+    },
+    {
+      "AttributeName": "fiscal_date_ending",
+      "KeyType": "RANGE"
+    }
+  ],
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "symbol",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "fiscal_date_ending",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "period_type",
+      "AttributeType": "S"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "recent-statements-index",
+      "KeySchema": [
+        {
+          "AttributeName": "fiscal_date_ending",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "period_type",
+          "KeyType": "RANGE"
+        }
+      ],
+      "AttributeDefinitions": [
+        {
+          "AttributeName": "fiscal_date_ending",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "period_type",
+          "AttributeType": "S"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    }
+  ],
+  "ItemSchema": {
+    "symbol": {
+      "type": "S",
+      "description": "Primary key - Stock symbol (e.g., AAPL, MSFT)"
+    },
+    "fiscal_date_ending": {
+      "type": "S",
+      "description": "Sort key - Fiscal date ending (YYYY-MM-DD format)"
+    },
+    "reported_currency": {
+      "type": "S",
+      "description": "Currency of reported values (e.g., USD)"
+    },
+    "period_type": {
+      "type": "S",
+      "description": "Period type: 'quarterly' or 'annual'"
+    },
+    "gross_profit": {
+      "type": "N",
+      "description": "Gross profit"
+    },
+    "total_revenue": {
+      "type": "N",
+      "description": "Total revenue"
+    },
+    "cost_of_revenue": {
+      "type": "N",
+      "description": "Cost of revenue"
+    },
+    "operating_income": {
+      "type": "N",
+      "description": "Operating income"
+    },
+    "selling_general_and_administrative": {
+      "type": "N",
+      "description": "Selling, general and administrative expenses"
+    },
+    "research_and_development": {
+      "type": "N",
+      "description": "Research and development expenses"
+    },
+    "operating_expenses": {
+      "type": "N",
+      "description": "Total operating expenses"
+    },
+    "net_interest_income": {
+      "type": "N",
+      "description": "Net interest income"
+    },
+    "interest_income": {
+      "type": "N",
+      "description": "Interest income"
+    },
+    "interest_expense": {
+      "type": "N",
+      "description": "Interest expense"
+    },
+    "depreciation_and_amortization": {
+      "type": "N",
+      "description": "Depreciation and amortization"
+    },
+    "income_before_tax": {
+      "type": "N",
+      "description": "Income before tax"
+    },
+    "income_tax_expense": {
+      "type": "N",
+      "description": "Income tax expense"
+    },
+    "net_income_from_continuing_operations": {
+      "type": "N",
+      "description": "Net income from continuing operations"
+    },
+    "ebit": {
+      "type": "N",
+      "description": "Earnings before interest and taxes"
+    },
+    "ebitda": {
+      "type": "N",
+      "description": "Earnings before interest, taxes, depreciation and amortization"
+    },
+    "net_income": {
+      "type": "N",
+      "description": "Net income"
+    },
+    "created_at": {
+      "type": "S",
+      "description": "ISO 8601 timestamp of record creation"
+    },
+    "updated_at": {
+      "type": "S",
+      "description": "ISO 8601 timestamp of last record update"
+    }
+  },
+  "BillingMode": "PAY_PER_REQUEST",
+  "Tags": [
+    {
+      "Key": "Environment",
+      "Value": "production"
+    },
+    {
+      "Key": "Service",
+      "Value": "signal9-advisor"
+    },
+    {
+      "Key": "TableType",
+      "Value": "income-statement"
+    }
+  ]
+} 

@@ -1,0 +1,163 @@
+{
+  "TableName": "newsSentiment",
+  "Description": "DynamoDB table for storing all news sentiment data from AlphaVantage API, with asset associations for comprehensive market analysis",
+  "KeySchema": [
+    {
+      "AttributeName": "news_id",
+      "KeyType": "HASH"
+    },
+    {
+      "AttributeName": "time_published",
+      "KeyType": "RANGE"
+    }
+  ],
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "news_id",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "time_published",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "asset_symbol",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "overall_sentiment_score",
+      "AttributeType": "N"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "asset-news-index",
+      "KeySchema": [
+        {
+          "AttributeName": "asset_symbol",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "time_published",
+          "KeyType": "RANGE"
+        }
+      ],
+      "AttributeDefinitions": [
+        {
+          "AttributeName": "asset_symbol",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "time_published",
+          "AttributeType": "S"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    },
+    {
+      "IndexName": "sentiment-score-index",
+      "KeySchema": [
+        {
+          "AttributeName": "overall_sentiment_score",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "time_published",
+          "KeyType": "RANGE"
+        }
+      ],
+      "AttributeDefinitions": [
+        {
+          "AttributeName": "overall_sentiment_score",
+          "AttributeType": "N"
+        },
+        {
+          "AttributeName": "time_published",
+          "AttributeType": "S"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    }
+  ],
+  "ItemSchema": {
+    "news_id": {
+      "type": "S",
+      "description": "Primary key - Unique identifier for the news article"
+    },
+    "time_published": {
+      "type": "S",
+      "description": "Sort key - ISO 8601 timestamp when the news was published"
+    },
+    "asset_symbol": {
+      "type": "S",
+      "description": "Associated stock symbol (e.g., AAPL, MSFT) - may be null for general market news"
+    },
+    "title": {
+      "type": "S",
+      "description": "News article title"
+    },
+    "url": {
+      "type": "S",
+      "description": "URL to the news article"
+    },
+    "overall_sentiment_score": {
+      "type": "N",
+      "description": "Overall sentiment score (-1.0 to 1.0, negative to positive)"
+    },
+    "overall_sentiment_label": {
+      "type": "S",
+      "description": "Sentiment label (negative, neutral, positive)"
+    },
+    "ticker_sentiment_json": {
+      "type": "S",
+      "description": "JSON string containing ticker-specific sentiment data"
+    },
+    "relevance_score": {
+      "type": "N",
+      "description": "Relevance score indicating how relevant the news is to the asset (0.0 to 1.0)"
+    },
+    "related_assets": {
+      "type": "S",
+      "description": "JSON array of additional asset symbols mentioned in the news"
+    },
+    "source": {
+      "type": "S",
+      "description": "News source (e.g., Reuters, Bloomberg)"
+    },
+    "summary": {
+      "type": "S",
+      "description": "Brief summary of the news article"
+    },
+    "last_sync_timestamp": {
+      "type": "S",
+      "description": "ISO 8601 timestamp of last sync from AlphaVantage API"
+    },
+    "created_at": {
+      "type": "S",
+      "description": "ISO 8601 timestamp of record creation"
+    },
+    "updated_at": {
+      "type": "S",
+      "description": "ISO 8601 timestamp of last record update"
+    }
+  },
+  "BillingMode": "PAY_PER_REQUEST",
+  "Tags": [
+    {
+      "Key": "Environment",
+      "Value": "production"
+    },
+    {
+      "Key": "Service",
+      "Value": "signal9-advisor"
+    },
+    {
+      "Key": "TableType",
+      "Value": "news-sentiment"
+    }
+  ]
+} 

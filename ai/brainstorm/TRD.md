@@ -8,7 +8,7 @@
 - Node.js lambda functions (v22 runtime)
 - Authentication via Auth0
 - API Gateway for REST API endpoints
-- DynamoDB for primary data storage
+- DynamoDB for all data storage (no RDS)
 - S3 for static assets and file storage
 - CloudFront for content delivery
 - EventBridge for event-driven processing
@@ -65,9 +65,9 @@
 
 ### Data Architecture
 
-**Hybrid Data Storage Strategy**:
-- **Primary Storage**: DynamoDB for structured metrics and fast queries
-- **Secondary Storage**: S3 for full AI analysis JSON objects
+**Data Storage Strategy**:
+- **Primary Storage**: DynamoDB for all structured data and fast queries
+- **Secondary Storage**: S3 for full AI analysis JSON objects and large files
 - **Search Index**: OpenSearch/Elasticsearch for semantic search capabilities
 - **Caching**: ElastiCache Redis for frequently accessed data
 
@@ -104,9 +104,10 @@
 - Constraints: User ownership, preference validation
 
 **News Sentiment Table**:
-- Attributes: sentiment_id (PK), asset_id (FK), title, url, time_published, overall_sentiment_score, overall_sentiment_label, ticker_sentiment_json, relevance_score, created_at
-- Relationships: Many-to-one with assets
-- Constraints: Real-time updates, sentiment validation
+- Attributes: news_id (PK), time_published (SK), asset_symbol, title, url, overall_sentiment_score, overall_sentiment_label, ticker_sentiment_json, relevance_score, related_assets, source, summary, last_sync_timestamp, created_at, updated_at
+- Relationships: Many-to-many with assets (news can mention multiple assets)
+- Constraints: Real-time updates, sentiment validation, hourly sync schedule
+- Indexes: asset-news-index (by asset_symbol + time_published), sentiment-score-index (by sentiment_score + time_published)
 
 **Earnings Calendar Table**:
 - Attributes: calendar_id (PK), asset_id (FK), earnings_date, report_time (pre-market/post-market), estimated_eps, actual_eps, surprise, surprise_percentage, created_at, updated_at
@@ -119,7 +120,7 @@
 - Constraints: Unique asset per queue, status validation
 
 **Storage Solutions**:
-- **Primary Storage**: DynamoDB for structured data with auto-scaling
+- **Primary Storage**: DynamoDB for all structured data with auto-scaling
 - **Secondary Storage**: S3 for large JSON objects and historical data
 - **Caching Strategy**: Redis for AI ratings, sector averages, user preferences
 - **Data Retention Requirements**: 2+ years for AI analysis, 5+ years for financial data, 90 days for news sentiment
@@ -264,6 +265,7 @@
 **Data Ingestion Metrics**:
 - `AssetSyncSuccess` / `AssetSyncFailure` (Count)
 - `EarningsCalendarSyncSuccess` / `EarningsCalendarSyncFailure` (Count)
+- `NewsSentimentSyncSuccess` / `NewsSentimentSyncFailure` (Count)
 - `DataPollinationSuccess` / `DataPollinationFailure` (Count)
 - `AssetsProcessed` / `AssetsFailed` (Count)
 - `QueueDepth` (Gauge)
@@ -286,6 +288,9 @@
 - `BatchSize` (Gauge)
 - `QueueProcessingRate` (Rate)
 - `RetryCount` (Histogram)
+- `NewsRecordsProcessed` / `NewsRecordsFailed` (Count)
+- `NewsArticlesPerHour` (Gauge)
+- `AssetMatchesFound` (Count)
 
 **CloudWatch Dashboard - Data Ingestion Flow**:
 - **Real-time Queue Depth**: Number of pending analysis items
@@ -301,6 +306,8 @@
 - API error rate > 5%
 - Validation failure rate > 15%
 - Processing time > 5 minutes per batch
+- News sentiment sync failure rate > 20%
+- AlphaVantage API rate limit hits > 1 per hour (should never happen with single call)
 
 **Logging**:
 - **Log Levels**: ERROR, WARN, INFO, DEBUG with structured logging
@@ -400,13 +407,27 @@
 - **Output**: Event-driven pollination triggers for regular asset updates
 - **Validation**: Asset prioritization logic, rate limit compliance
 
+**Hourly News Sentiment Sync (Every Hour)**:
+- **Purpose**: Collect fresh news sentiment data for comprehensive market analysis
+- **Trigger**: Hourly cron schedule (`0 * * * ? *`)
+- **Process**:
+  - Calculate date range (last 2 hours) for news collection
+  - Single call to Alpha Vantage NEWS_SENTIMENT endpoint with date range
+  - Query signal9_assets table for all active asset symbols
+  - Match news to assets by parsing content for ticker mentions
+  - Store all news with asset associations
+  - Update lastNewsSyncTimestamp
+- **Output**: Updated newsSentiment table with all news and asset associations
+- **Validation**: Sentiment score ranges, relevance scores, data completeness
+- **Rate Limiting**: Single API call per hour (well within AlphaVantage free tier limits)
+
 **Event Handlers**:
 
 **pollenationNeeded Event Handler**:
 - **Purpose**: Process financial data ingestion for individual assets
 - **Trigger**: Event-driven (from cron triggers)
 - **Process**:
-  - Call AlphaVantage API endpoints (Company Overview, Earnings, Cash Flow, Balance Sheet, Income Statement, News Sentiment, Earnings Call Scripts)
+  - Call AlphaVantage API endpoints (Company Overview, Earnings, Cash Flow, Balance Sheet, Income Statement, Earnings Call Scripts)
   - Validate all incoming financial data
   - Upsert data in foundational data tables
   - Dispatch `analysisNeeded` event for processed asset
@@ -441,6 +462,7 @@
 5:00 AM: Earnings Calendar Sync (Cron) → AlphaVantage → EarningsCalendar Table
 6:00 AM: Earnings Pollination (Cron) → pollenationNeeded Events + earningsProcessed Events
 7:00 AM: Regular Pollination (Cron) → pollenationNeeded Events
+Hourly: News Sentiment Sync (Cron) → AlphaVantage → NewsSentiment Table
 Event-Driven: pollenationNeeded → PollenateAsset → analysisNeeded → AnalyzeAsset → analysisComplete
 Event-Driven: earningsProcessed → markEarningsProcessed → Update EarningsCalendar
 ```
@@ -493,7 +515,7 @@ Hourly: AI Processing → Retrieve Queue → Batch Processing → AI Analysis �
 
 **Alpha Vantage APIs**:
 - **Rate Limits**: 5 API calls per minute, 500 per day (free tier)
-- **Data Types**: Company overview, financial statements, earnings, news sentiment
+- **Data Types**: Company overview, financial statements, earnings (news sentiment handled separately via hourly sync)
 - **Error Handling**: Graceful degradation when APIs are unavailable
 - **Caching**: Cache API responses to minimize rate limit impact
 

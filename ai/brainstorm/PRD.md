@@ -18,21 +18,22 @@
   - Want to understand the "why" behind investment recommendations
   - Have long-term financial goals (retirement, wealth building, financial independence)
 
-**Features Overview - Assets**: 
-    - Authentication: Users can create an account, verify their email, and log in to the system.
+**Features Overview - Authentication**: 
+    - Users can create an account, verify their email, and log in to the system.
     - User Preferences: Users can save the following data points on their profile.
         - First Name
         - Last Name
         - Birth Date
         - Topics of Interest
         - Investment Knowledge Level
-    - Asset Database: There is a central database of tradable assets.
+    - Asset Database: There is a central database of tradable assets sourced from Alpaca.
     - The asset database can be searched by a variety of properties, but primarily we will search by ticker or company name.
     - Event-driven data processing pipeline operates on a sophisticated scheduling system:
         - **Daily Asset Sync** (4:00 AM): Synchronizes with Alpaca API to ensure latest tradable assets
         - **Daily Earnings Calendar Sync** (5:00 AM): Tracks upcoming earnings releases for proactive data updates
         - **Daily Earnings-Triggered Pollination** (6:00 AM): Triggers data updates for assets with recent earnings releases
         - **Daily Regular Pollination** (7:00 AM): Triggers data updates for high-volume assets with stale data
+        - **Hourly News Sentiment Sync** (Every Hour): Collects fresh news sentiment data for comprehensive market analysis
         - **Event-Driven Processing**: Individual asset processing triggered by specific events (pollenationNeeded, analysisNeeded)
         - **Smart Prioritization**: Earnings-relevant assets get immediate processing, followed by high-volume assets
         - **State Management**: Proper tracking of processed earnings to prevent duplicate processing
@@ -54,7 +55,7 @@
             - Balance Sheets (assets, liabilities, debt levels, cash positions)
             - Cash Flow Statements (operating cash flow, capital expenditures, dividend payments)
             - Earnings Data (EPS trends, earnings surprises, quarterly performance)
-            - News Sentiment (market sentiment, news impact on specific tickers)
+        - News sentiment data is collected separately via the Hourly News Sentiment Sync process
     
     - **Sentiment Rating Generation**:
         - Analyze news sentiment scores and relevance for specific assets

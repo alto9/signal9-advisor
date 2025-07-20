@@ -1,0 +1,117 @@
+{
+  "TableName": "earnings",
+  "Description": "DynamoDB table for storing earnings data from AlphaVantage API",
+  "KeySchema": [
+    {
+      "AttributeName": "symbol",
+      "KeyType": "HASH"
+    },
+    {
+      "AttributeName": "fiscal_date_ending",
+      "KeyType": "RANGE"
+    }
+  ],
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "symbol",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "fiscal_date_ending",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "report_time",
+      "AttributeType": "S"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "recent-earnings-index",
+      "KeySchema": [
+        {
+          "AttributeName": "fiscal_date_ending",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "report_time",
+          "KeyType": "RANGE"
+        }
+      ],
+      "AttributeDefinitions": [
+        {
+          "AttributeName": "fiscal_date_ending",
+          "AttributeType": "S"
+        },
+        {
+          "AttributeName": "report_time",
+          "AttributeType": "S"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    }
+  ],
+  "ItemSchema": {
+    "symbol": {
+      "type": "S",
+      "description": "Primary key - Stock symbol (e.g., AAPL, MSFT)"
+    },
+    "fiscal_date_ending": {
+      "type": "S",
+      "description": "Sort key - Fiscal date ending (YYYY-MM-DD format)"
+    },
+    "reported_date": {
+      "type": "S",
+      "description": "Date when earnings were reported"
+    },
+    "reported_eps": {
+      "type": "N",
+      "description": "Reported earnings per share"
+    },
+    "estimated_eps": {
+      "type": "N",
+      "description": "Estimated earnings per share"
+    },
+    "surprise": {
+      "type": "N",
+      "description": "Earnings surprise amount"
+    },
+    "surprise_percentage": {
+      "type": "N",
+      "description": "Earnings surprise percentage"
+    },
+    "report_time": {
+      "type": "S",
+      "description": "Report time: 'bmo' (before market open) or 'amc' (after market close)"
+    },
+    "period_type": {
+      "type": "S",
+      "description": "Period type: 'quarterly' or 'annual'"
+    },
+    "created_at": {
+      "type": "S",
+      "description": "ISO 8601 timestamp of record creation"
+    },
+    "updated_at": {
+      "type": "S",
+      "description": "ISO 8601 timestamp of last record update"
+    }
+  },
+  "BillingMode": "PAY_PER_REQUEST",
+  "Tags": [
+    {
+      "Key": "Environment",
+      "Value": "production"
+    },
+    {
+      "Key": "Service",
+      "Value": "signal9-advisor"
+    },
+    {
+      "Key": "TableType",
+      "Value": "earnings"
+    }
+  ]
+} 

@@ -1,0 +1,121 @@
+{
+  "TableName": "signal9_assets",
+  "Description": "DynamoDB table for storing tradable assets from Alpaca API",
+  "KeySchema": [
+    {
+      "AttributeName": "symbol",
+      "KeyType": "HASH"
+    }
+  ],
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "symbol",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "status",
+      "AttributeType": "S"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "status-index",
+      "KeySchema": [
+        {
+          "AttributeName": "status",
+          "KeyType": "HASH"
+        }
+      ],
+      "AttributeDefinitions": [
+        {
+          "AttributeName": "status",
+          "AttributeType": "S"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    }
+  ],
+  "ItemSchema": {
+    "symbol": {
+      "type": "S",
+      "description": "Primary key - Stock symbol (e.g., AAPL, MSFT)"
+    },
+    "name": {
+      "type": "S",
+      "description": "Company name"
+    },
+    "exchange": {
+      "type": "S",
+      "description": "Trading exchange (e.g., NASDAQ, NYSE)"
+    },
+    "asset_class": {
+      "type": "S",
+      "description": "Asset classification (e.g., us_equity, crypto)"
+    },
+    "status": {
+      "type": "S",
+      "description": "Asset status (e.g., active, inactive)"
+    },
+    "tradable": {
+      "type": "BOOL",
+      "description": "Whether the asset is tradable"
+    },
+    "marginable": {
+      "type": "BOOL",
+      "description": "Whether the asset can be traded on margin"
+    },
+    "shortable": {
+      "type": "BOOL",
+      "description": "Whether the asset can be shorted"
+    },
+    "easy_to_borrow": {
+      "type": "BOOL",
+      "description": "Whether the asset is easy to borrow for shorting"
+    },
+    "fractionable": {
+      "type": "BOOL",
+      "description": "Whether the asset can be traded in fractional shares"
+    },
+    "min_order_size": {
+      "type": "N",
+      "description": "Minimum order size in shares"
+    },
+    "min_trade_increment": {
+      "type": "N",
+      "description": "Minimum trade increment"
+    },
+    "price_increment": {
+      "type": "N",
+      "description": "Price increment for the asset"
+    },
+    "last_sync_timestamp": {
+      "type": "S",
+      "description": "ISO 8601 timestamp of last sync from Alpaca API"
+    },
+    "created_at": {
+      "type": "S",
+      "description": "ISO 8601 timestamp of record creation"
+    },
+    "updated_at": {
+      "type": "S",
+      "description": "ISO 8601 timestamp of last record update"
+    }
+  },
+  "BillingMode": "PAY_PER_REQUEST",
+  "Tags": [
+    {
+      "Key": "Environment",
+      "Value": "production"
+    },
+    {
+      "Key": "Service",
+      "Value": "signal9-advisor"
+    },
+    {
+      "Key": "TableType",
+      "Value": "assets"
+    }
+  ]
+} 
