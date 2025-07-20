@@ -58,7 +58,7 @@
   - Purpose: Provides detailed asset-specific analysis and insights
   - Dependencies: Analysis data, financial data, fundamental data
   - Technical Constraints: Interactive UI components, chart rendering, walk-through wizard functionality
-  - Features: 10 analysis components (Investment Rating, Financial Health, Risk Assessment, Market Analysis, Peer Comparison, Earnings Analysis, News Feed, Technical Analysis, Management Analysis, Financial Modeling) with first-time user onboarding wizard
+  - Features: 8 analysis components (Investment Rating, Financial Health, Risk Assessment, Peer Comparison, Earnings Analysis, News Feed, Management Analysis, Financial Modeling) with first-time user onboarding wizard
 
 - **Watchlist Management Service**:
   - Purpose: Manages user watchlists and portfolio tracking
@@ -106,14 +106,14 @@
 - Constraints: Daily updates, data validation, rating range 1-5
 
 **Watchlists Table**:
-- Attributes: watchlist_id (PK), user_id (FK), name, description, created_at, updated_at, is_default
+- Attributes: watchlist_id (PK), user_id (FK), name, description, created_at, updated_at, is_default, asset_count
 - Relationships: Many-to-one with users, one-to-many with watchlist_items
-- Constraints: User ownership, unique names per user
+- Constraints: User ownership, unique names per user, asset_count >= 0
 
 **Watchlist Items Table**:
-- Attributes: item_id (PK), watchlist_id (FK), asset_id (FK), added_at, notes, alert_preferences
+- Attributes: item_id (PK), watchlist_id (FK), asset_id (FK), added_at, sort_order
 - Relationships: Many-to-one with watchlists and assets
-- Constraints: Unique asset per watchlist
+- Constraints: Unique asset per watchlist, sort_order >= 0
 
 **User Preferences Table**:
 - Attributes: preference_id (PK), user_id (FK), preference_key, preference_value, updated_at
@@ -121,9 +121,7 @@
 - Constraints: User ownership, preference validation
 
 **User Alerts Table**:
-- Attributes: alert_id (PK), user_id (FK), asset_id (FK), alert_type (rating_change, news_event, risk_factor, earnings), alert_conditions, is_active, created_at, updated_at
-- Relationships: Many-to-one with users and assets
-- Constraints: User ownership, alert type validation
+- *Note: Alert functionality removed from MVP scope - will be added in future phases*
 
 **News Table**:
 - Attributes: news_id (PK), time_published (SK), asset_symbol, title, url, relevance_score, related_assets, source, summary, last_sync_timestamp, created_at, updated_at, news_category, market_impact
@@ -137,12 +135,14 @@
 - Constraints: Unique earnings per asset per date, date validation
 
 **Analysis Queue Table**:
-- Attributes: queue_id (PK), asset_id (FK), priority (high/normal/low), queued_at, scheduled_for, retry_count, last_attempt, status (pending/processing/completed/failed), error_message, validation_status
-- Relationships: Many-to-one with assets
-- Constraints: Unique asset per queue, status validation
+- *Note: Queue functionality removed - analysis is handled via EventBridge events and Step Functions orchestration*
 
-**Financial Data Table**:
-- Attributes: financial_id (PK), asset_id (FK), data_type (income_statement, balance_sheet, cash_flow, company_overview), period_end_date, data_json, last_updated
+**Financial Data Tables**:
+- **Income Statement Table**: income_statement (PK), asset_id (FK), fiscal_date_ending, revenue, net_income, etc.
+- **Balance Sheet Table**: balance_sheet (PK), asset_id (FK), fiscal_date_ending, total_assets, total_liabilities, etc.
+- **Cash Flow Table**: cash_flow (PK), asset_id (FK), fiscal_date_ending, operating_cash_flow, investing_cash_flow, etc.
+- **Company Overview Table**: company_overview (PK), asset_id (FK), market_cap, pe_ratio, dividend_yield, etc.
+- **Earnings Table**: earnings (PK), asset_id (FK), fiscal_date_ending, reported_eps, estimated_eps, etc.
 - Relationships: Many-to-one with assets
 - Constraints: Data type validation, date consistency
 
@@ -157,14 +157,10 @@
 - Constraints: Data validation, sector consistency
 
 **Daily Briefing Cache Table**:
-- Attributes: briefing_id (PK), user_id (FK), briefing_date, widget_data_json, last_generated, expires_at
-- Relationships: Many-to-one with users
-- Constraints: Daily generation, cache expiration
+- *Note: Caching removed from MVP scope - daily briefing data is queried directly from source tables*
 
 **Asset Profile Cache Table**:
-- Attributes: profile_id (PK), asset_id (FK), profile_data_json, last_generated, expires_at
-- Relationships: Many-to-one with assets
-- Constraints: Cache expiration, data freshness
+- *Note: Caching removed from MVP scope - asset profile data is pre-computed and stored in asset_analysis table*
 
 **Storage Solutions**:
 - **Primary Storage**: DynamoDB for all structured data with auto-scaling
@@ -198,12 +194,10 @@
 - `DELETE /watchlists/{id}/assets/{asset_id}` - Remove asset from watchlist
 
 **Daily Briefing Endpoints**:
-- `GET /briefing/daily` - Get personalized daily briefing with all 8 widgets
-- `GET /briefing/widgets/{widget_name}` - Get specific widget data (executive_summary, watchlists, portfolio_analytics, market_overview, earnings_calendar, market_news, personalized_insights)
-- `GET /briefing/news` - Get personalized news feed
-- `GET /briefing/market-overview` - Get market overview data
-- `PUT /briefing/layout` - Update user's widget layout preferences
-- `GET /briefing/export` - Export briefing data as PDF/CSV
+- `GET /briefing/daily` - Get personalized daily briefing with 3 core widgets
+- `GET /briefing/watchlists` - Get user's watchlists with Signal9 ratings
+- `GET /briefing/search` - Search assets with basic info and ratings
+- `GET /briefing/earnings` - Get upcoming earnings for watchlist assets
 
 **Asset Profile Endpoints**:
 - `GET /assets/{symbol}/profile` - Get comprehensive asset profile with all 10 analysis components
@@ -229,12 +223,7 @@
 - `GET /analysis/valuation/{symbol}` - Get valuation models and fair value estimates
 
 **Alert and Notification Endpoints**:
-- `GET /alerts` - Get user's active alerts
-- `POST /alerts` - Create new alert
-- `PUT /alerts/{alert_id}` - Update alert
-- `DELETE /alerts/{alert_id}` - Delete alert
-- `GET /alerts/types` - Get available alert types and conditions
-- `POST /alerts/test` - Test alert conditions
+- *Note: Alert functionality removed from MVP scope - will be added in future phases*
 
 **Data Visualization Endpoints**:
 - `GET /charts/{symbol}/price` - Get price chart data

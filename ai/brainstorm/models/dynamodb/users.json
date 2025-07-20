@@ -1,0 +1,120 @@
+{
+  "TableName": "signal9_users",
+  "Description": "Stores user account information and preferences for Signal9 Advisor",
+  "KeySchema": [
+    {
+      "AttributeName": "user_id",
+      "KeyType": "HASH"
+    }
+  ],
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "user_id",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "email",
+      "AttributeType": "S"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "email-index",
+      "KeySchema": [
+        {
+          "AttributeName": "email",
+          "KeyType": "HASH"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    }
+  ],
+  "BillingMode": "PAY_PER_REQUEST",
+  "Tags": [
+    {
+      "Key": "Environment",
+      "Value": "production"
+    },
+    {
+      "Key": "Service",
+      "Value": "signal9-advisor"
+    },
+    {
+      "Key": "TableType",
+      "Value": "user-management"
+    }
+  ],
+  "ItemSchema": {
+    "user_id": {
+      "type": "S",
+      "description": "Unique identifier for the user (UUID)",
+      "required": true
+    },
+    "email": {
+      "type": "S",
+      "description": "User's email address (unique)",
+      "required": true
+    },
+    "first_name": {
+      "type": "S",
+      "description": "User's first name",
+      "required": true
+    },
+    "last_name": {
+      "type": "S",
+      "description": "User's last name",
+      "required": true
+    },
+    "birth_date": {
+      "type": "S",
+      "description": "User's birth date (YYYY-MM-DD format)",
+      "required": false
+    },
+    "topics_of_interest": {
+      "type": "L",
+      "description": "List of investment topics the user is interested in",
+      "required": false,
+      "items": {
+        "type": "S"
+      }
+    },
+    "investment_knowledge_level": {
+      "type": "S",
+      "description": "User's self-assessed investment knowledge level (beginner, intermediate, advanced)",
+      "required": false
+    },
+    "created_at": {
+      "type": "S",
+      "description": "Timestamp when user account was created (ISO 8601)",
+      "required": true
+    },
+    "updated_at": {
+      "type": "S",
+      "description": "Timestamp when user profile was last updated (ISO 8601)",
+      "required": true
+    },
+    "auth0_user_id": {
+      "type": "S",
+      "description": "Auth0 user identifier for authentication",
+      "required": true
+    },
+    "is_active": {
+      "type": "BOOL",
+      "description": "Whether the user account is active",
+      "required": true,
+      "default": true
+    }
+  },
+  "Constraints": [
+    "Unique email address per user",
+    "Required fields: user_id, email, first_name, last_name, created_at, updated_at, auth0_user_id",
+    "email must be valid email format",
+    "investment_knowledge_level must be one of: beginner, intermediate, advanced"
+  ],
+  "Relationships": [
+    "One-to-many with watchlists (via user_id)",
+    "One-to-many with user_preferences (via user_id)"
+  ]
+} 

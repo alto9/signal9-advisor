@@ -8,9 +8,15 @@ This folder contains the data model definitions for the Signal9 Advisor system.
 models/
 ├── README.md                 # This file
 ├── dynamodb/                 # DynamoDB table definitions
-│   ├── signal9_assets.json   # Assets table schema
+│   ├── users.json            # Users table schema
+│   ├── watchlists.json       # Watchlists table schema
+│   ├── watchlist_items.json  # Watchlist items table schema
+│   ├── asset_analysis.json   # Asset analysis table schema
+│   ├── user_preferences.json # User preferences table schema
+
+│   ├── assets.json           # Assets comprehensive data table schema (fundamental + trading)
+│   ├── news.json             # News data table schema (comprehensive with sentiment)
 │   ├── earningsCalendar.json # Earnings calendar table schema
-│   ├── newsSentiment.json    # News sentiment table schema
 │   ├── companyOverview.json  # Company overview table schema
 │   ├── earnings.json         # Earnings data table schema
 │   ├── incomeStatement.json  # Income statement table schema
@@ -29,14 +35,89 @@ models/
 
 ## DynamoDB Models
 
-### signal9_assets.json
-- **Purpose**: Stores tradable assets from Alpaca API
-- **Primary Key**: `symbol` (String)
-- **GSI**: `status-index` for querying by asset status
+### users.json
+- **Purpose**: Stores user account information and preferences
+- **Primary Key**: `user_id` (String)
+- **GSI**: `email-index` for email-based lookups
 - **Key Features**: 
-  - Single-table design for asset data
-  - Optimized for symbol-based lookups
-  - Includes trading metadata (tradable, marginable, etc.)
+  - User authentication via Auth0 integration
+  - Profile information and investment preferences
+  - Investment knowledge level tracking
+  - GDPR/CCPA compliance ready
+
+### watchlists.json
+- **Purpose**: Stores user watchlists for tracking assets of interest
+- **Primary Key**: `user_id` (String) + `watchlist_id` (String)
+- **GSI**: `default-watchlist-index` for finding user's default watchlist
+- **Key Features**: 
+  - Multi-watchlist support per user
+  - Default watchlist designation
+  - Asset count tracking for quick display
+  - User ownership and access control
+
+### watchlist_items.json
+- **Purpose**: Stores individual assets within user watchlists
+- **Primary Key**: `watchlist_id` (String) + `asset_id` (String)
+- **GSI**: `asset-watchlists-index` for finding all watchlists containing an asset
+- **Key Features**: 
+  - Unique asset per watchlist constraint
+  - Custom sort ordering support
+  - Timestamp tracking for when assets were added
+  - Efficient asset-to-watchlist relationship queries
+
+### asset_analysis.json
+- **Purpose**: Stores rule-based analysis results and Signal9 investment ratings
+- **Primary Key**: `asset_id` (String) + `analysis_date` (String)
+- **GSIs**: `rating-index`, `sector-rating-index` for rating and sector-based queries
+- **Key Features**: 
+  - Comprehensive investment rating (1-5 scale)
+  - Component scores (financial health, risk, growth, market)
+  - Rating confidence and stability metrics
+  - Historical rating tracking
+  - Searchable analysis content
+
+### user_preferences.json
+- **Purpose**: Stores user preferences and settings for personalization
+- **Primary Key**: `user_id` (String) + `preference_key` (String)
+- **Key Features**: 
+  - Flexible key-value preference storage
+  - JSON support for complex preferences
+  - Common preference keys for themes, notifications, investment style
+  - User-specific customization options
+
+
+
+### assets.json
+- **Purpose**: Stores comprehensive asset data including fundamental analysis data and trading metadata from Alpaca API
+- **Primary Key**: `asset_id` (String)
+- **GSIs**: `symbol-index`, `sector-status-index`, `tradable-status-index` for symbol, sector, and trading-based queries
+- **Key Features**: 
+  - Fundamental asset information (sector, industry, market cap)
+  - Trading metadata (tradable, marginable, shortable, etc.)
+  - Pollenation tracking for data freshness
+  - Asset status management (active, inactive, delisted)
+  - Integration with analysis and watchlist systems
+
+### news.json
+- **Purpose**: Stores comprehensive news data including sentiment analysis, asset associations, and market impact for Signal9 analysis
+- **Primary Key**: `news_id` (String) + `time_published` (String)
+- **GSIs**: `asset-news-index`, `sentiment-score-index`, `category-index`, `source-index` for asset, sentiment, category, and source-based queries
+- **Key Features**: 
+  - News articles with comprehensive sentiment analysis and relevance scoring
+  - Asset associations and market impact assessment (supports both asset-specific and general market news)
+  - Category-based filtering and time-based queries
+  - Support for multiple assets per news article via ticker_sentiment
+  - Topics categorization with relevance scores
+  - Authors, banner images, and source metadata
+  - AlphaVantage NEWS_SENTIMENT API compatible structure
+
+
+
+
+
+
+
+
 
 ### earningsCalendar.json
 - **Purpose**: Stores earnings calendar data from AlphaVantage API
@@ -47,16 +128,24 @@ models/
   - Optimized for upcoming earnings queries
   - Supports both estimated and actual EPS data
 
-### newsSentiment.json
-- **Purpose**: Stores all news sentiment data from AlphaVantage API with asset associations
-- **Primary Key**: `news_id` (String) + `time_published` (String)
-- **GSIs**: `asset-news-index` (by asset_symbol + time_published), `sentiment-score-index` (by sentiment_score + time_published)
-- **Key Features**:
-  - Stores all news regardless of asset association for comprehensive market analysis
-  - News is matched to assets by parsing content for ticker mentions
-  - Supports many-to-many relationships (news can mention multiple assets)
-  - Optimized for both asset-specific and general market news queries
-  - Updated hourly with single API call for efficiency
+### Financial Data Architecture
+
+The system uses **specialized tables** for different types of financial data rather than a generic table:
+
+- **incomeStatement.json**: Detailed income statement data with revenue, expenses, profitability metrics
+- **balanceSheet.json**: Complete balance sheet data for financial health analysis  
+- **cashFlow.json**: Cash flow statement data for liquidity and sustainability assessment
+- **companyOverview.json**: Company metadata, ratios, and key financial indicators
+- **earnings.json**: Earnings data with surprises and analyst estimates
+
+**Benefits of Specialized Tables**:
+- **Better Performance**: Direct field access vs JSON parsing
+- **Type Safety**: Structured fields with proper data types
+- **Efficient Indexing**: GSIs on specific financial fields
+- **Analytics**: Easier financial calculations and peer comparisons
+- **Validation**: Field-level constraints and data quality checks
+
+
 
 ### companyOverview.json
 - **Purpose**: Stores company overview data from AlphaVantage API

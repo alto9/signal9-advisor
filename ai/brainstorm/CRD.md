@@ -22,4 +22,4 @@ This file serves as a central repository for all relevant context that will be n
 
 ### MCP Tools
 - **AWS CDK**: `Tool: CDKGeneralGuidance` - "CDK Construct Guidance"
-
+- **AWS Documentation**: `Tool: read_documentation` - "AWS General Guidance"

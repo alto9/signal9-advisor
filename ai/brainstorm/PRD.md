@@ -38,44 +38,27 @@
         - **Data Validation**: Comprehensive validation of all incoming financial data before processing
         - **Real-time Monitoring**: CloudWatch dashboard provides visibility into event flow and processing status
 
-**Features Overview - Daily Briefing**: The dashboard that users see after login is referred to as the 'Daily Briefing'. This personalized dashboard provides comprehensive investment insights based on rule-based analysis of fundamental financial data and risk assessment.
+**Features Overview - Daily Briefing**: The dashboard that users see after login is referred to as the 'Daily Briefing'. This simple dashboard provides watchlist management and asset discovery, serving as a gateway to detailed asset profile analysis.
 
-### **Daily Briefing Components (Portfolio & Market Level)**
+### **Daily Briefing Components (MVP Version)**
 
 #### **1. Watchlists Overview Widget**
 - **Multi-Watchlist Management**: Create named watchlists (e.g., "Tech Stocks", "Dividend Payers", "Growth Opportunities")
-- **One-Click Actions**: Add/remove assets, view detailed profiles, set alerts
-- **Signal9 Ratings Summary**: Current investment ratings (1-5 scale) with trend indicators
-- **Quick Filters**: Filter by rating, sector, market cap, or recent changes
-- **Performance Tracking**: Daily/weekly/monthly performance metrics for each watchlist
+- **One-Click Actions**: Add/remove assets, view detailed profiles
+- **Signal9 Ratings Summary**: Current investment ratings (1-5 scale) for watchlist assets
+- **Quick Filters**: Filter by rating, sector, or recent changes
+- **Basic Watchlist Info**: Number of assets, average rating, sectors represented
 
-#### **2. Watchlist Analytics Dashboard**
-- **Sector Allocation**: Watchlist breakdown by sector with Signal9 ratings
-- **Risk Distribution**: Watchlist risk profile and diversification analysis
-- **Rating Distribution**: Distribution of Signal9 ratings across watchlist assets
-- **Diversification Insights**: Analysis of watchlist concentration and sector exposure
-- **Watchlist Performance**: Track watchlist composition changes and rating trends
+#### **2. Asset Search & Discovery**
+- **Search Assets**: Search by ticker symbol or company name
+- **Asset Results**: Display basic asset info (name, sector, market cap, Signal9 rating)
+- **Add to Watchlist**: One-click add to selected watchlist
+- **Quick Preview**: Basic Signal9 rating and key metrics preview
 
-#### **3. Market Overview**
-- **Market Performance**: Overall market performance and key market drivers
-- **Sector Performance**: Performance analysis by sector (Tech, Healthcare, Finance, etc.)
-- **Market Highlights**: Most impactful market events affecting user's watchlist
-- **Market Alerts**: Significant market changes requiring attention
-- **Market Drivers**: Key factors driving overall market performance
-
-#### **4. Earnings & Events Calendar**
+#### **3. Earnings Calendar (Basic)**
 - **Upcoming Earnings**: Earnings release dates for user's watchlist assets
-- **Recent Earnings Summary**: Summary of latest earnings results and market impact
-- **Earnings Surprises**: Significant earnings beats/misses across watchlist
-- **Corporate Events**: Dividends, splits, mergers affecting watchlist assets
-- **Market Impact**: Overall market impact of earnings season and events
-
-#### **5. Market News & Insights**
-- **Top Market News**: Most important news affecting overall market
-- **Sector News**: Key news by sector relevant to user's news preferences
-- **Economic Indicators**: Key economic data releases and market impact
-- **Fed & Policy News**: Central bank announcements and policy changes
-- **Global Market Updates**: International market developments
+- **Basic Earnings Info**: Company name, earnings date, estimated EPS
+- **View Asset Profile**: Link to detailed asset profile for earnings analysis
 
 
 ## **Asset Profile Pages**
@@ -107,14 +90,7 @@ Individual asset profile pages provide comprehensive, detailed analysis for spec
 - **Business Risk Factors**: Market position, competitive threats, regulatory risks
 - **Risk Alerts**: Notifications for elevated risk levels or new risk factors
 
-#### **4. Market Analysis**
-- **Market Performance**: Current market performance and trend analysis
-- **News Impact**: Recent news articles affecting the asset with relevance scores and impact analysis
-- **Analyst Coverage**: Wall Street analyst ratings, price targets, and recommendation changes
-- **Market Trends**: 30-day market trend analysis with key drivers and changes
-- **Market Alerts**: Significant market changes requiring attention
-
-#### **5. Peer Comparison Analysis**
+#### **4. Peer Comparison Analysis**
 - **Sector Rankings**: Asset performance vs. sector peers (percentile rankings)
 - **Valuation Comparison**: P/E, P/B, ROE, ROA vs. sector averages and industry leaders
 - **Growth Comparison**: Revenue and earnings growth vs. industry peers
@@ -122,7 +98,7 @@ Individual asset profile pages provide comprehensive, detailed analysis for spec
 - **Market Position**: Competitive moat, market share, and industry positioning
 - **Peer Performance**: Side-by-side comparison with top sector competitors
 
-#### **6. Earnings & Events Analysis**
+#### **5. Earnings & Events Analysis**
 - **Earnings History**: Detailed earnings history with beats/misses and market reactions
 - **Earnings Projections**: Analyst estimates and AI-generated earnings forecasts
 - **Earnings Quality**: Assessment of recurring vs. one-time earnings components
@@ -130,7 +106,7 @@ Individual asset profile pages provide comprehensive, detailed analysis for spec
 - **Event Impact**: AI-predicted impact of upcoming events on stock performance
 - **Earnings Calendar**: Historical and future earnings release schedule
 
-#### **7. News & Research Feed**
+#### **6. News & Research Feed**
 - **Asset-Specific News**: Curated news articles relevant to the specific asset
 - **News Impact**: Impact analysis for each news article with relevance scoring
 - **Research Reports**: Integration with analyst research and reports
@@ -138,15 +114,7 @@ Individual asset profile pages provide comprehensive, detailed analysis for spec
 - **News Alerts**: Customizable alerts for significant news events
 - **News Archive**: Historical news with impact assessment
 
-#### **8. Technical Analysis**
-- **Price Charts**: Interactive price charts with multiple timeframes
-- **Technical Indicators**: Moving averages, RSI, MACD, Bollinger Bands, volume analysis
-- **Support/Resistance**: Key price levels and technical patterns
-- **Trading Volume**: Volume analysis and unusual activity detection
-- **Chart Patterns**: AI-identified chart patterns and trend analysis
-- **Technical Alerts**: Breakout, breakdown, and pattern completion alerts
-
-#### **9. Management & Strategy Analysis**
+#### **7. Management & Strategy Analysis**
 - **Management Team**: Executive profiles and track record analysis
 - **Corporate Governance**: Board composition, shareholder rights, governance scores
 - **Strategic Initiatives**: Current strategic priorities and execution progress
@@ -154,81 +122,38 @@ Individual asset profile pages provide comprehensive, detailed analysis for spec
 - **Innovation Pipeline**: R&D investments, new products, market expansion
 - **Management Effectiveness**: Correlation between management decisions and financial performance
 
-#### **10. Financial Modeling & Projections**
-- **Revenue Projections**: AI-generated revenue forecasts with scenario analysis
-- **Earnings Projections**: EPS forecasts with sensitivity analysis
-- **Valuation Models**: DCF, comparable company, and sum-of-parts valuations
-- **Scenario Analysis**: Bull, base, and bear case scenarios
-- **Sensitivity Analysis**: Impact of key variables on valuation
-- **Fair Value Estimates**: AI-calculated fair value with confidence intervals
-
 ### **Asset Profile User Experience**
 
 #### **Navigation & Layout**
 - **Tabbed Interface**: Organized sections for different types of analysis
-- **Quick Actions**: Add to watchlist, set alerts, export data, share analysis
+- **Quick Actions**: Add to watchlist, share analysis
 - **Breadcrumb Navigation**: Easy navigation back to Daily Briefing
 - **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 - **Print/Export**: Generate PDF reports and export data for external analysis
 - **Walk-through Wizard**: First-time user onboarding wizard that guides users through each panel with brief descriptions and user-friendly explanations of how ratings and aggregations were calculated
 
-#### **Interactive Features**
-- **Expandable Sections**: Click to expand detailed analysis components
-- **Interactive Charts**: Zoom, pan, and customize chart views
-- **Comparison Tools**: Side-by-side comparison with other assets
-- **Alert Management**: Set custom alerts for specific metrics or events
-- **Bookmarking**: Save specific analysis views for quick access
-
-#### **Data Visualization**
-- **Progress Indicators**: Visual representation of rating components and confidence levels
-- **Heat Maps**: Risk factor visualization and peer comparison charts
-- **Trend Lines**: Historical performance and projection visualization
-- **Alert Indicators**: Visual cues for significant changes requiring attention
-- **Comparison Tables**: Side-by-side metrics with peer and sector averages
-
-### **Daily Briefing Data Sources**
+### **Daily Briefing Data Sources (MVP)**
 
 #### **Rule-Based Analysis Results**
-- **Investment Ratings**: 1-5 scale ratings with detailed reasoning
-- **Financial Health Scores**: Comprehensive financial analysis results
-- **Risk Assessment**: Multi-factor risk analysis with specific risk factors
-- **Market Analysis**: Market performance scores and news impact analysis
-- **Peer Comparison**: Sector-relative performance and competitive analysis
+- **Investment Ratings**: 1-5 scale ratings for watchlist assets
+- **Basic Asset Info**: Company name, sector, market cap, Signal9 rating
 
 #### **Fundamental Data**
-- **Financial Data**: Earnings reports, financial statements, and ratios
-- **News Data**: News articles and relevance scores
-- **Earnings Calendar**: Upcoming and recent earnings events
-- **Corporate Events**: Dividends, splits, and other significant events
+- **Asset Database**: Basic asset information from Alpaca API
+- **Earnings Calendar**: Upcoming earnings dates from AlphaVantage
+- **Signal9 Ratings**: Current rule-based analysis results
 
-#### **Historical Analysis**
-- **Rating History**: Historical Signal9 ratings and trend analysis
-- **Watchlist Tracking**: Historical watchlist composition and rating changes
-- **Market Trends**: 30-day market trend analysis
-- **Financial Trends**: 5-year financial performance analysis
+### **Daily Briefing User Experience (MVP)**
 
-### **Daily Briefing User Experience**
-
-#### **Personalization Features**
-- **Customizable Layout**: Drag-and-drop widget arrangement
+#### **Basic Features**
+- **Simple Layout**: Fixed widget layout optimized for usability
 - **Watchlist Management**: Create and manage multiple investment watchlists
-- **Alert Preferences**: Customizable alerts for rating changes, news, and events
-- **Data Depth**: Expandable widgets for detailed analysis views
 - **Mobile Responsive**: Optimized for desktop, tablet, and mobile devices
 
-#### **Intelligent Features**
-- **Smart Notifications**: Rule-based alerts for significant changes
-- **Trend Analysis**: Automatic identification of rating and market trends
-- **Correlation Insights**: Rule-based identification of relationships between assets and events
-- **Analysis Insights**: Rule-based suggested actions based on analysis patterns
-- **Learning System**: Adapts to user preferences and investment style
-
-#### **Data Visualization**
-- **Interactive Charts**: Rating trends, watchlist metrics, and market analysis
-- **Heat Maps**: Sector performance and risk distribution visualization
-- **Comparison Tables**: Side-by-side asset comparison with key metrics
-- **Progress Indicators**: Visual representation of rating components and confidence levels
-- **Alert Indicators**: Visual cues for significant changes requiring attention
+#### **Data Display**
+- **Simple Tables**: Basic watchlist and search results in table format
+- **Rating Display**: Clear 1-5 scale rating display with color coding
+- **Basic Filters**: Simple filtering by rating and sector
 
 ## **Rule-Based Analysis Engine**
 
@@ -271,13 +196,7 @@ The rule-based analysis engine processes comprehensive financial data and genera
 - **Volatility Analysis**: Price volatility, earnings volatility, and stability metrics
 - **Risk Factor Identification**: Specific risk factors with impact assessment
 
-#### **4. Market Analysis**
-- **Market Performance**: Current market performance and trend analysis
-- **News Impact**: Recent news articles affecting the asset with relevance scores and impact analysis
-- **Market Trends**: 30-day market trend analysis with key drivers and changes
-- **Analyst Coverage**: Wall Street analyst ratings, price targets, and recommendation changes
-
-#### **5. Peer Comparison Analysis**
+#### **4. Peer Comparison Analysis**
 - **Sector Rankings**: Asset performance vs. sector peers (percentile rankings)
 - **Valuation Comparison**: P/E, P/B, ROE, ROA vs. sector averages and industry leaders
 - **Growth Comparison**: Revenue and earnings growth vs. industry peers

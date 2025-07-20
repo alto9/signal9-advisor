@@ -1,0 +1,116 @@
+{
+  "TableName": "signal9_watchlists",
+  "Description": "Stores user watchlists for tracking assets of interest",
+  "KeySchema": [
+    {
+      "AttributeName": "user_id",
+      "KeyType": "HASH"
+    },
+    {
+      "AttributeName": "watchlist_id",
+      "KeyType": "RANGE"
+    }
+  ],
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "user_id",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "watchlist_id",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "is_default",
+      "AttributeType": "S"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "default-watchlist-index",
+      "KeySchema": [
+        {
+          "AttributeName": "user_id",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "is_default",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    }
+  ],
+  "BillingMode": "PAY_PER_REQUEST",
+  "Tags": [
+    {
+      "Key": "Environment",
+      "Value": "production"
+    },
+    {
+      "Key": "Service",
+      "Value": "signal9-advisor"
+    },
+    {
+      "Key": "TableType",
+      "Value": "user-data"
+    }
+  ],
+  "ItemSchema": {
+    "user_id": {
+      "type": "S",
+      "description": "User ID who owns this watchlist",
+      "required": true
+    },
+    "watchlist_id": {
+      "type": "S",
+      "description": "Unique identifier for the watchlist (UUID)",
+      "required": true
+    },
+    "name": {
+      "type": "S",
+      "description": "Watchlist name (e.g., 'Tech Stocks', 'Dividend Payers')",
+      "required": true
+    },
+    "description": {
+      "type": "S",
+      "description": "Optional description of the watchlist",
+      "required": false
+    },
+    "created_at": {
+      "type": "S",
+      "description": "Timestamp when watchlist was created (ISO 8601)",
+      "required": true
+    },
+    "updated_at": {
+      "type": "S",
+      "description": "Timestamp when watchlist was last modified (ISO 8601)",
+      "required": true
+    },
+    "is_default": {
+      "type": "S",
+      "description": "Whether this is the user's default watchlist ('true' or 'false')",
+      "required": true,
+      "default": "false"
+    },
+    "asset_count": {
+      "type": "N",
+      "description": "Number of assets in the watchlist (for quick display)",
+      "required": true,
+      "default": "0"
+    }
+  },
+  "Constraints": [
+    "User ownership (user_id must exist in Users table)",
+    "Unique names per user (user can't have two watchlists with same name)",
+    "asset_count >= 0",
+    "Only one default watchlist per user",
+    "Required fields: user_id, watchlist_id, name, created_at, updated_at, is_default, asset_count"
+  ],
+  "Relationships": [
+    "Many-to-one with users (via user_id)",
+    "One-to-many with watchlist_items (via watchlist_id)"
+  ]
+} 

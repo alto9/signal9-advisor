@@ -63,8 +63,8 @@ The platform is built on a robust, event-driven architecture that efficiently pr
 **Focus**: Implement advanced analytics and personalized user experiences
 
 **Key Components**:
-- **Daily Briefing System**: 8 core widgets (Executive Summary, Watchlists Overview, Watchlist Analytics, Market Overview, Earnings Calendar, Market News, Personalized Insights)
-- **Asset Profile System**: 9 analysis components (Investment Rating, Financial Health, Risk Assessment, Market Analysis, Peer Comparison, Earnings Analysis, News Feed, Management Analysis, Financial Modeling) with walk-through wizard
+- **Daily Briefing System**: 3 core widgets (Watchlists Overview, Asset Search & Discovery, Basic Earnings Calendar)
+- **Asset Profile System**: 8 analysis components (Investment Rating, Financial Health, Risk Assessment, Peer Comparison, Earnings Analysis, News Feed, Management Analysis, Financial Modeling) with walk-through wizard
 - **Advanced Analytics**: Trend analysis, predictive modeling, and financial projections
 - **Personalization Engine**: User preference learning and adaptive recommendations
 - **Data Visualization**: Interactive charts, heat maps, and fundamental data displays
@@ -78,8 +78,8 @@ The platform is built on a robust, event-driven architecture that efficiently pr
 - Fundamental data updates and interactive features
 
 **Deliverables**:
-- Daily Briefing dashboard with 8 personalized widgets and drag-and-drop layout
-- Asset Profile pages with 10 detailed analysis components and tabbed interface
+- Daily Briefing dashboard with 3 core widgets and simple layout
+- Asset Profile pages with 8 detailed analysis components and tabbed interface
 - Advanced financial analytics with DCF, comparable company, and scenario analysis
 - Interactive data visualization with Chart.js/D3.js integration
 - Mobile-responsive interface with touch-friendly interactions

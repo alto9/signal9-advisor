@@ -1,0 +1,95 @@
+{
+  "TableName": "signal9_watchlist_items",
+  "Description": "Stores individual assets within user watchlists",
+  "KeySchema": [
+    {
+      "AttributeName": "watchlist_id",
+      "KeyType": "HASH"
+    },
+    {
+      "AttributeName": "asset_id",
+      "KeyType": "RANGE"
+    }
+  ],
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "watchlist_id",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "asset_id",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "added_at",
+      "AttributeType": "S"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "asset-watchlists-index",
+      "KeySchema": [
+        {
+          "AttributeName": "asset_id",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "added_at",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    }
+  ],
+  "BillingMode": "PAY_PER_REQUEST",
+  "Tags": [
+    {
+      "Key": "Environment",
+      "Value": "production"
+    },
+    {
+      "Key": "Service",
+      "Value": "signal9-advisor"
+    },
+    {
+      "Key": "TableType",
+      "Value": "user-data"
+    }
+  ],
+  "ItemSchema": {
+    "watchlist_id": {
+      "type": "S",
+      "description": "Watchlist ID this item belongs to",
+      "required": true
+    },
+    "asset_id": {
+      "type": "S",
+      "description": "Asset ID in this watchlist",
+      "required": true
+    },
+    "added_at": {
+      "type": "S",
+      "description": "Timestamp when asset was added to watchlist (ISO 8601)",
+      "required": true
+    },
+    "sort_order": {
+      "type": "N",
+      "description": "Integer for custom ordering of assets in watchlist",
+      "required": true,
+      "default": "0"
+    }
+  },
+  "Constraints": [
+    "Unique asset per watchlist (can't add same asset twice to same watchlist)",
+    "sort_order >= 0",
+    "watchlist_id must exist in Watchlists table",
+    "asset_id must exist in Assets table",
+    "Required fields: watchlist_id, asset_id, added_at, sort_order"
+  ],
+  "Relationships": [
+    "Many-to-one with watchlists (via watchlist_id)",
+    "Many-to-one with assets (via asset_id)"
+  ]
+} 
