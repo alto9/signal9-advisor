@@ -4,35 +4,35 @@ This diagram shows the AWS Step Functions state machine for handling the `analys
 
 ```mermaid
 flowchart TD
-    A[EVENT: analysisNeeded<br/>EventBridge] --> B[Step Functions<br/>State Machine: AssetAnalysis]
+    A[EVENT: analysisNeeded<br/>EventBridge<br/>Contains: asset_symbol, analysis_id] --> B[Step Functions<br/>State Machine: AssetAnalysis<br/>Orchestrates entire analysis workflow]
     
-    B --> C[Initialize Analysis<br/>State: Initialize]
-    C --> D[Load Asset Data<br/>State: LoadAssetData<br/>Lambda: LoadAssetData]
-    D --> E[Load Financial Data<br/>State: LoadFinancialData<br/>Lambda: LoadFinancialData]
-    E --> F[Load News Sentiment<br/>State: LoadNewsSentiment<br/>Lambda: LoadNewsSentiment]
+    B --> C[Initialize Analysis<br/>State: Initialize<br/>Extracts: asset_symbol, analysis_id, timestamp]
+    C --> D[Load Asset Data<br/>State: LoadAssetData<br/>Lambda: LoadAssetData<br/>Queries: signal9_assets table<br/>Gets: symbol, name, sector, market_cap, status]
+    D --> E[Load Financial Data<br/>State: LoadFinancialData<br/>Lambda: LoadFinancialData<br/>Queries: companyOverview, earnings, incomeStatement,<br/>balanceSheet, cashFlow tables<br/>Gets: P/E ratios, revenue, debt, cash flow, EPS]
+    E --> F[Load News Sentiment<br/>State: LoadNewsSentiment<br/>Lambda: LoadNewsSentiment<br/>Queries: newsSentiment table<br/>Gets: Last 30 days sentiment scores,<br/>news articles, relevance scores]
     
-    F --> G[Data Preprocessing<br/>State: PreprocessData<br/>Lambda: DataProcessor]
-    G --> H[Parallel Processing<br/>State: ParallelAnalysis]
+    F --> G[Data Preprocessing<br/>State: PreprocessData<br/>Lambda: DataProcessor<br/>Calculates: Financial ratios, validates data,<br/>normalizes time series, handles missing values]
+    G --> H[Parallel Processing<br/>State: ParallelAnalysis<br/>Executes 4 analysis branches concurrently]
     
-    H --> I[Sentiment Analysis<br/>State: SentimentAnalysis<br/>Amazon Comprehend]
-    H --> J[Financial Health<br/>State: FinancialHealth<br/>SageMaker Endpoint]
-    H --> K[Risk Assessment<br/>State: RiskAssessment<br/>SageMaker Endpoint]
-    H --> L[Peer Comparison<br/>State: PeerComparison<br/>Lambda: PeerAnalyzer]
+    H --> I[Sentiment Analysis<br/>State: SentimentAnalysis<br/>Amazon Comprehend<br/>Processes: News articles for sentiment scores,<br/>key phrases, entity recognition]
+    H --> J[Financial Health<br/>State: FinancialHealth<br/>SageMaker Endpoint<br/>Analyzes: Liquidity ratios, solvency metrics,<br/>profitability indicators, cash flow stability]
+    H --> K[Risk Assessment<br/>State: RiskAssessment<br/>SageMaker Endpoint<br/>Evaluates: Volatility, debt levels, market position,<br/>sector-specific risks, earnings consistency]
+    H --> L[Peer Comparison<br/>State: PeerComparison<br/>Lambda: PeerAnalyzer<br/>Queries: signal9_assets table for sector peers<br/>Compares: P/E, P/B, ROE, ROA, growth rates]
     
-    I --> M[Wait for All<br/>State: WaitForParallel]
+    I --> M[Wait for All<br/>State: WaitForParallel<br/>Collects results from all parallel branches]
     J --> M
     K --> M
     L --> M
     
-    M --> N[Generate Investment Rating<br/>State: GenerateRating<br/>Amazon Bedrock]
-    N --> O[Create Analysis Report<br/>State: CreateReport<br/>Lambda: ReportGenerator]
-    O --> P[Store Results<br/>State: StoreResults<br/>DynamoDB: assetAnalysis]
-    P --> Q[Update Queue Status<br/>State: UpdateQueue<br/>DynamoDB: analysisQueue]
-    Q --> R[Dispatch Complete Event<br/>State: DispatchEvent<br/>EventBridge]
-    R --> S[SUCCESS<br/>State: Success]
+    M --> N[Generate Investment Rating<br/>State: GenerateRating<br/>Amazon Bedrock<br/>Model: Claude 3.5 Sonnet<br/>Inputs: All analysis results<br/>Outputs: 1-5 rating, reasoning, confidence score]
+    N --> O[Create Analysis Report<br/>State: CreateReport<br/>Lambda: ReportGenerator<br/>Assembles: Executive summary, financial analysis,<br/>risk assessment, peer comparison, investment rating]
+    O --> P[Store Results<br/>State: StoreResults<br/>DynamoDB: assetAnalysis<br/>Stores: Complete analysis report with all metrics,<br/>ratings, and supporting data]
+    P --> Q[Update Queue Status<br/>State: UpdateQueue<br/>DynamoDB: analysisQueue<br/>Updates: Status to 'completed', timestamp]
+    Q --> R[Dispatch Complete Event<br/>State: DispatchEvent<br/>EventBridge<br/>Triggers: User notifications, dashboard updates,<br/>portfolio rebalancing]
+    R --> S[SUCCESS<br/>State: Success<br/>Analysis workflow completed successfully]
     
     %% Error Handling States
-    C --> T[Error Handler<br/>State: ErrorHandler]
+    C --> T[Error Handler<br/>State: ErrorHandler<br/>Centralized error processing for all states]
     D --> T
     E --> T
     F --> T
@@ -47,14 +47,14 @@ flowchart TD
     Q --> T
     R --> T
     
-    T --> U[Update Queue as Failed<br/>State: UpdateQueueFailed]
-    U --> V[Send Alert<br/>State: SendAlert<br/>SNS Topic]
-    V --> W[FAILURE<br/>State: Failure]
+    T --> U[Update Queue as Failed<br/>State: UpdateQueueFailed<br/>DynamoDB: analysisQueue<br/>Updates: Status to 'failed', error message, timestamp]
+    U --> V[Send Alert<br/>State: SendAlert<br/>SNS Topic<br/>Notifies: Operations team of analysis failure]
+    V --> W[FAILURE<br/>State: Failure<br/>Analysis workflow failed]
     
     %% Monitoring
-    X[CloudWatch Metrics<br/>State Transitions, Duration]
-    Y[CloudWatch Logs<br/>Step Execution Logs]
-    Z[X-Ray Tracing<br/>End-to-End Tracing]
+    X[CloudWatch Metrics<br/>State Transitions, Duration<br/>Tracks: Processing time, success rates, queue depth]
+    Y[CloudWatch Logs<br/>Step Execution Logs<br/>Records: Detailed execution logs with correlation IDs]
+    Z[X-Ray Tracing<br/>End-to-End Tracing<br/>Traces: Complete request flow across all services]
     
     style A fill:#2196F3,stroke:#1976D2,stroke-width:2px,color:#ffffff
     style B fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#ffffff
@@ -68,398 +68,365 @@ flowchart TD
     style Z fill:#607D8B,stroke:#455A64,stroke-width:2px,color:#ffffff
 ```
 
-## Step Functions State Machine Architecture
+## Detailed Component Descriptions
 
-### **State Machine Definition (ASL - Amazon States Language)**
+### **Data Loading Lambda Functions**
 
-```json
-{
-  "Comment": "Asset Analysis State Machine",
-  "StartAt": "Initialize",
-  "States": {
-    "Initialize": {
-      "Type": "Pass",
-      "Result": {
-        "asset_symbol": "$.detail.asset_symbol",
-        "analysis_id": "$.id",
-        "timestamp": "$$.State.EnteredTime"
-      },
-      "Next": "LoadAssetData"
-    },
-    "LoadAssetData": {
-      "Type": "Task",
-      "Resource": "arn:aws:lambda:${region}:${account}:function:LoadAssetData",
-      "Retry": [
-        {
-          "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException"],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 3,
-          "BackoffRate": 2.0
-        }
-      ],
-      "Catch": [
-        {
-          "ErrorEquals": ["States.ALL"],
-          "Next": "ErrorHandler"
-        }
-      ],
-      "Next": "LoadFinancialData"
-    },
-    "LoadFinancialData": {
-      "Type": "Task",
-      "Resource": "arn:aws:lambda:${region}:${account}:function:LoadFinancialData",
-      "Retry": [
-        {
-          "ErrorEquals": ["Lambda.ServiceException"],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 3
-        }
-      ],
-      "Catch": [
-        {
-          "ErrorEquals": ["States.ALL"],
-          "Next": "ErrorHandler"
-        }
-      ],
-      "Next": "LoadNewsSentiment"
-    },
-    "LoadNewsSentiment": {
-      "Type": "Task",
-      "Resource": "arn:aws:lambda:${region}:${account}:function:LoadNewsSentiment",
-      "Retry": [
-        {
-          "ErrorEquals": ["Lambda.ServiceException"],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 3
-        }
-      ],
-      "Catch": [
-        {
-          "ErrorEquals": ["States.ALL"],
-          "Next": "ErrorHandler"
-        }
-      ],
-      "Next": "PreprocessData"
-    },
-    "PreprocessData": {
-      "Type": "Task",
-      "Resource": "arn:aws:lambda:${region}:${account}:function:DataProcessor",
-      "Retry": [
-        {
-          "ErrorEquals": ["Lambda.ServiceException"],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 3
-        }
-      ],
-      "Catch": [
-        {
-          "ErrorEquals": ["States.ALL"],
-          "Next": "ErrorHandler"
-        }
-      ],
-      "Next": "ParallelAnalysis"
-    },
-    "ParallelAnalysis": {
-      "Type": "Parallel",
-      "Branches": [
-        {
-          "StartAt": "SentimentAnalysis",
-          "States": {
-            "SentimentAnalysis": {
-              "Type": "Task",
-              "Resource": "arn:aws:comprehend:${region}:${account}:batch-detection-job",
-              "Parameters": {
-                "InputDataConfig": {
-                  "S3Uri": "$.news_data_s3_uri",
-                  "InputFormat": "ONE_DOC_PER_FILE"
-                },
-                "OutputDataConfig": {
-                  "S3Uri": "$.sentiment_output_s3_uri"
-                },
-                "DataAccessRoleArn": "arn:aws:iam::${account}:role/ComprehendDataAccessRole",
-                "JobName": "$.analysis_id-sentiment"
-              },
-              "Next": "SentimentComplete"
-            },
-            "SentimentComplete": {
-              "Type": "Pass",
-              "End": true
-            }
-          }
-        },
-        {
-          "StartAt": "FinancialHealth",
-          "States": {
-            "FinancialHealth": {
-              "Type": "Task",
-              "Resource": "arn:aws:sagemaker:${region}:${account}:endpoint/${financial_health_endpoint}/invocations",
-              "Parameters": {
-                "Body": "$.financial_data",
-                "ContentType": "application/json"
-              },
-              "Next": "FinancialHealthComplete"
-            },
-            "FinancialHealthComplete": {
-              "Type": "Pass",
-              "End": true
-            }
-          }
-        },
-        {
-          "StartAt": "RiskAssessment",
-          "States": {
-            "RiskAssessment": {
-              "Type": "Task",
-              "Resource": "arn:aws:sagemaker:${region}:${account}:endpoint/${risk_assessment_endpoint}/invocations",
-              "Parameters": {
-                "Body": "$.financial_data",
-                "ContentType": "application/json"
-              },
-              "Next": "RiskAssessmentComplete"
-            },
-            "RiskAssessmentComplete": {
-              "Type": "Pass",
-              "End": true
-            }
-          }
-        },
-        {
-          "StartAt": "PeerComparison",
-          "States": {
-            "PeerComparison": {
-              "Type": "Task",
-              "Resource": "arn:aws:lambda:${region}:${account}:function:PeerAnalyzer",
-              "Next": "PeerComparisonComplete"
-            },
-            "PeerComparisonComplete": {
-              "Type": "Pass",
-              "End": true
-            }
-          }
-        }
-      ],
-      "Catch": [
-        {
-          "ErrorEquals": ["States.ALL"],
-          "Next": "ErrorHandler"
-        }
-      ],
-      "Next": "WaitForParallel"
-    },
-    "WaitForParallel": {
-      "Type": "Pass",
-      "Next": "GenerateRating"
-    },
-    "GenerateRating": {
-      "Type": "Task",
-      "Resource": "arn:aws:bedrock:${region}:${account}:invoke-model",
-      "Parameters": {
-        "ModelId": "anthropic.claude-3-sonnet-20240229-v1:0",
-        "Body": {
-          "prompt": "$.analysis_prompt",
-          "max_tokens": 4000,
-          "temperature": 0.1
-        }
-      },
-      "Retry": [
-        {
-          "ErrorEquals": ["Bedrock.ThrottlingException"],
-          "IntervalSeconds": 5,
-          "MaxAttempts": 3,
-          "BackoffRate": 2.0
-        }
-      ],
-      "Catch": [
-        {
-          "ErrorEquals": ["States.ALL"],
-          "Next": "ErrorHandler"
-        }
-      ],
-      "Next": "CreateReport"
-    },
-    "CreateReport": {
-      "Type": "Task",
-      "Resource": "arn:aws:lambda:${region}:${account}:function:ReportGenerator",
-      "Retry": [
-        {
-          "ErrorEquals": ["Lambda.ServiceException"],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 3
-        }
-      ],
-      "Catch": [
-        {
-          "ErrorEquals": ["States.ALL"],
-          "Next": "ErrorHandler"
-        }
-      ],
-      "Next": "StoreResults"
-    },
-    "StoreResults": {
-      "Type": "Task",
-      "Resource": "arn:aws:dynamodb:${region}:${account}:table/assetAnalysis",
-      "Parameters": {
-        "Item": {
-          "symbol": "$.asset_symbol",
-          "analysis_date": "$.timestamp",
-          "analysis_data": "$.analysis_results"
-        }
-      },
-      "Retry": [
-        {
-          "ErrorEquals": ["DynamoDB.ProvisionedThroughputExceededException"],
-          "IntervalSeconds": 1,
-          "MaxAttempts": 3
-        }
-      ],
-      "Catch": [
-        {
-          "ErrorEquals": ["States.ALL"],
-          "Next": "ErrorHandler"
-        }
-      ],
-      "Next": "UpdateQueue"
-    },
-    "UpdateQueue": {
-      "Type": "Task",
-      "Resource": "arn:aws:dynamodb:${region}:${account}:table/analysisQueue",
-      "Parameters": {
-        "Key": {
-          "queue_id": "$.analysis_id"
-        },
-        "UpdateExpression": "SET #status = :status, completed_at = :timestamp",
-        "ExpressionAttributeNames": {
-          "#status": "status"
-        },
-        "ExpressionAttributeValues": {
-          ":status": "completed",
-          ":timestamp": "$$.State.EnteredTime"
-        }
-      },
-      "Next": "DispatchEvent"
-    },
-    "DispatchEvent": {
-      "Type": "Task",
-      "Resource": "arn:aws:events:${region}:${account}:event-bus/default",
-      "Parameters": {
-        "Entries": [
-          {
-            "Source": "signal9.analysis",
-            "DetailType": "analysisComplete",
-            "Detail": {
-              "asset_symbol": "$.asset_symbol",
-              "analysis_id": "$.analysis_id",
-              "status": "completed"
-            }
-          }
-        ]
-      },
-      "Next": "Success"
-    },
-    "Success": {
-      "Type": "Succeed"
-    },
-    "ErrorHandler": {
-      "Type": "Pass",
-      "Next": "UpdateQueueFailed"
-    },
-    "UpdateQueueFailed": {
-      "Type": "Task",
-      "Resource": "arn:aws:dynamodb:${region}:${account}:table/analysisQueue",
-      "Parameters": {
-        "Key": {
-          "queue_id": "$.analysis_id"
-        },
-        "UpdateExpression": "SET #status = :status, error_message = :error, failed_at = :timestamp",
-        "ExpressionAttributeNames": {
-          "#status": "status"
-        },
-        "ExpressionAttributeValues": {
-          ":status": "failed",
-          ":error": "$.error",
-          ":timestamp": "$$.State.EnteredTime"
-        }
-      },
-      "Next": "SendAlert"
-    },
-    "SendAlert": {
-      "Type": "Task",
-      "Resource": "arn:aws:sns:${region}:${account}:topic/analysis-failures",
-      "Parameters": {
-        "Message": {
-          "analysis_id": "$.analysis_id",
-          "asset_symbol": "$.asset_symbol",
-          "error": "$.error",
-          "timestamp": "$$.State.EnteredTime"
-        }
-      },
-      "Next": "Failure"
-    },
-    "Failure": {
-      "Type": "Fail",
-      "Cause": "Analysis failed",
-      "Error": "AnalysisError"
-    }
-  }
-}
-```
+#### **LoadAssetData Lambda**
+- **Purpose**: Retrieves basic asset information and metadata
+- **Queries**: `signal9_assets` table
+- **Key Data Retrieved**:
+  - `symbol`: Stock ticker symbol (e.g., AAPL, MSFT)
+  - `name`: Company name
+  - `sector`: Industry sector classification
+  - `market_cap`: Market capitalization
+  - `status`: Active/inactive trading status
+  - `tradable`: Whether asset can be traded
+  - `marginable`: Whether asset can be margined
+- **Use Case**: Provides context for analysis and peer comparison
 
-## Benefits of Step Functions Architecture
+#### **LoadFinancialData Lambda**
+- **Purpose**: Retrieves comprehensive financial data from multiple tables
+- **Queries**: Multiple DynamoDB tables in parallel
+- **Data Sources**:
+  - `companyOverview`: P/E ratios, dividend yield, analyst ratings
+  - `earnings`: Historical EPS, earnings surprises, quarterly performance
+  - `incomeStatement`: Revenue, expenses, profit margins, R&D spending
+  - `balanceSheet`: Assets, liabilities, debt levels, cash positions
+  - `cashFlow`: Operating cash flow, capital expenditures, dividend payments
+- **Key Metrics**: Financial ratios, growth rates, profitability indicators
 
-### **1. Built-in Error Handling**
-- **Retry Logic**: Automatic retry with exponential backoff
-- **Error Recovery**: Graceful handling of failures at any step
-- **Dead Letter Queues**: Failed executions are captured for investigation
-- **Error Notifications**: SNS alerts for critical failures
+#### **LoadNewsSentiment Lambda**
+- **Purpose**: Retrieves recent news sentiment data for market analysis
+- **Queries**: `newsSentiment` table with time-based filtering
+- **Data Retrieved**:
+  - News articles from last 30 days
+  - Sentiment scores (positive/negative/neutral)
+  - Relevance scores for asset association
+  - Key phrases and entity recognition
+  - News source and publication dates
+- **Use Case**: Provides market sentiment context for investment rating
 
-### **2. State Management**
-- **Automatic State Tracking**: No need to manually track execution state
-- **Data Passing**: Automatic data flow between states
-- **State Visualization**: Built-in execution history and visualization
-- **State Persistence**: Execution state is persisted automatically
+### **Data Processing Lambda Functions**
 
-### **3. Parallel Processing**
-- **Concurrent Execution**: Multiple analysis steps run in parallel
-- **Resource Optimization**: Better utilization of AWS resources
-- **Faster Execution**: Reduced total processing time
-- **Independent Scaling**: Each parallel branch can scale independently
+#### **DataProcessor Lambda**
+- **Purpose**: Cleans, validates, and calculates derived financial metrics
+- **Processing Tasks**:
+  - **Financial Ratio Calculations**:
+    - P/E, P/B, ROE, ROA, debt-to-equity
+    - Current ratio, quick ratio, interest coverage
+    - Gross margin, operating margin, net margin
+  - **Data Validation**:
+    - Outlier detection and handling
+    - Missing data imputation
+    - Date format validation
+  - **Time Series Normalization**:
+    - Revenue growth rates
+    - Earnings trend analysis
+    - Cash flow stability metrics
+- **Output**: Clean, validated dataset ready for AI analysis
 
-### **4. Monitoring & Observability**
-- **Execution History**: Complete audit trail of all state transitions
-- **Performance Metrics**: Built-in CloudWatch integration
-- **Visual Debugging**: Step-by-step execution visualization
-- **Error Tracking**: Detailed error information and stack traces
+#### **PeerAnalyzer Lambda**
+- **Purpose**: Compares asset against sector peers for competitive analysis
+- **Queries**: `signal9_assets` table for sector peers
+- **Analysis Performed**:
+  - **Sector Peer Identification**: Finds assets in same sector
+  - **Percentile Rankings**: Calculates relative performance
+  - **Competitive Metrics**:
+    - Valuation ratios vs. sector averages
+    - Growth rates vs. peers
+    - Market share analysis
+    - Relative strengths/weaknesses
+- **Output**: Peer comparison analysis with rankings
 
-### **5. Cost Efficiency**
-- **Pay-per-transition**: Only pay for state transitions, not idle time
-- **Resource Optimization**: Better resource utilization
-- **Reduced Lambda Costs**: Shorter Lambda execution times
-- **Built-in Caching**: Automatic caching of frequently accessed data
+#### **ReportGenerator Lambda**
+- **Purpose**: Creates comprehensive investment analysis report
+- **Input**: All analysis results from previous steps
+- **Report Sections**:
+  - **Executive Summary**: Key findings and investment rating
+  - **Financial Health Analysis**: Balance sheet and cash flow assessment
+  - **Risk Assessment**: Risk factors and mitigation strategies
+  - **Peer Comparison**: Competitive positioning analysis
+  - **Investment Rating**: 1-5 scale with detailed reasoning
+  - **Key Metrics Dashboard**: Summary of critical financial ratios
+- **Output**: Structured JSON report for storage and display
 
-### **6. Scalability**
-- **High Concurrency**: Can handle thousands of concurrent executions
-- **Auto-scaling**: Automatic scaling based on demand
-- **Resource Limits**: Configurable limits to prevent runaway costs
-- **Distributed Processing**: Can distribute across multiple regions
+### **AI/ML Services**
 
-## Implementation Considerations
+#### **Amazon Comprehend (Sentiment Analysis)**
+- **Input**: News articles and financial text
+- **Processing**:
+  - **Sentiment Detection**: Positive/negative/neutral classification
+  - **Key Phrase Extraction**: Identifies important terms and concepts
+  - **Entity Recognition**: Detects company names, financial terms
+  - **Targeted Sentiment**: Sentiment analysis for specific entities
+- **Output**: Structured sentiment data with confidence scores
 
-### **State Machine Configuration**
-- **Execution Timeout**: 15 minutes (configurable)
-- **History Retention**: 90 days (for audit purposes)
-- **Logging Level**: ALL (for comprehensive monitoring)
-- **Tracing**: X-Ray integration enabled
+#### **SageMaker Financial Health Endpoint**
+- **Model Type**: Custom XGBoost model
+- **Input Features**:
+  - Financial ratios (liquidity, solvency, profitability)
+  - Cash flow metrics and trends
+  - Growth indicators and stability measures
+  - Industry benchmarks and sector comparisons
+- **Output**: Financial health score (1-5 scale) with component breakdown
 
-### **Lambda Function Design**
-- **Stateless**: Each Lambda function is stateless
-- **Input/Output**: Clear input/output contracts
-- **Error Handling**: Proper error codes and messages
-- **Resource Optimization**: Appropriate memory and timeout settings
+#### **SageMaker Risk Assessment Endpoint**
+- **Model Type**: Custom Random Forest model
+- **Risk Factors Analyzed**:
+  - **Volatility Metrics**: Price volatility, earnings volatility
+  - **Debt Analysis**: Debt levels, interest coverage, credit risk
+  - **Cash Flow Stability**: Operating cash flow consistency
+  - **Market Position**: Competitive moat, market share
+  - **Sector-Specific Risks**: Industry-specific risk factors
+- **Output**: Risk score (1-5 scale) with detailed risk factor analysis
 
-### **Data Flow Management**
-- **ResultPath**: Used to manage data flow between states
-- **InputPath**: Used to filter input data for each state
-- **OutputPath**: Used to filter output data from each state
-- **Parameters**: Used to transform data between states
+#### **Amazon Bedrock (Investment Rating)**
+- **Model**: Claude 3.5 Sonnet
+- **Input**: Comprehensive analysis results from all previous steps
+- **Analysis Process**:
+  - **Synthesizes**: All financial, sentiment, and risk data
+  - **Evaluates**: Investment thesis and key drivers
+  - **Considers**: Market conditions and sector trends
+  - **Generates**: Investment rating with detailed reasoning
+- **Output**: 
+  - Investment rating (1-5 scale)
+  - Detailed reasoning and key factors
+  - Confidence score and rating stability
+  - Key strengths and risk factors
 
-This Step Functions architecture provides a robust, scalable, and maintainable solution for the asset analysis workflow, with built-in error handling, monitoring, and cost optimization features. 
+### **Data Storage & Queue Management**
+
+#### **DynamoDB Tables**
+
+**assetAnalysis Table**:
+- **Primary Key**: `symbol` (String)
+- **Sort Key**: `analysis_date` (String)
+- **Stores**: Complete analysis results, ratings, metrics
+- **TTL**: 2 years for cost optimization
+
+**analysisQueue Table**:
+- **Primary Key**: `queue_id` (String)
+- **Sort Key**: `asset_symbol` (String)
+- **Tracks**: Processing status, timestamps, error messages
+- **Status Values**: pending, processing, completed, failed
+
+### **Monitoring & Observability**
+
+#### **CloudWatch Metrics**
+- **State Transitions**: Tracks execution flow and timing
+- **Processing Duration**: Measures performance of each step
+- **Success/Failure Rates**: Monitors system reliability
+- **Queue Depth**: Tracks analysis backlog
+
+#### **CloudWatch Logs**
+- **Structured Logging**: JSON format with correlation IDs
+- **Step Execution**: Detailed logs for each state transition
+- **Error Tracking**: Comprehensive error information
+- **Performance Data**: Timing and resource utilization
+
+#### **X-Ray Tracing**
+- **End-to-End Tracing**: Complete request flow visualization
+- **Service Dependencies**: Maps interactions between services
+- **Performance Bottlenecks**: Identifies slow operations
+- **Error Propagation**: Tracks error flow through system
+
+This detailed architecture ensures comprehensive asset analysis with robust error handling, monitoring, and scalability for production use. 
+
+This Step Functions architecture provides a robust, scalable, and maintainable solution for the asset analysis workflow, with built-in error handling, monitoring, and cost optimization features.
+
+## Cost Estimation & Rate Limit Analysis
+
+### **Per-Run Cost Breakdown**
+
+#### **AWS Lambda Functions**
+| Function | Memory | Duration | Cost per 1M requests | Cost per run |
+|----------|--------|----------|---------------------|--------------|
+| LoadAssetData | 512MB | 2s | $0.20 | $0.0000004 |
+| LoadFinancialData | 1GB | 5s | $0.20 | $0.000002 |
+| LoadNewsSentiment | 512MB | 3s | $0.20 | $0.0000006 |
+| DataProcessor | 2GB | 10s | $0.20 | $0.000004 |
+| PeerAnalyzer | 1GB | 8s | $0.20 | $0.0000032 |
+| ReportGenerator | 1GB | 5s | $0.20 | $0.000002 |
+| **Lambda Total** | | | | **$0.0000132** |
+
+#### **AWS Step Functions**
+- **State Transitions**: 15 transitions per run
+- **Cost per 1M transitions**: $25.00
+- **Cost per run**: $0.000375
+
+#### **Amazon Comprehend**
+- **Sentiment Analysis**: $0.0001 per unit (100 characters)
+- **Average news articles**: 500 characters per article
+- **Articles per asset**: 50 articles (30 days)
+- **Cost per run**: $0.0025
+
+#### **Amazon SageMaker**
+- **Financial Health Endpoint**: $0.000065 per inference
+- **Risk Assessment Endpoint**: $0.000065 per inference
+- **Cost per run**: $0.00013
+
+#### **Amazon Bedrock**
+- **Claude 3.5 Sonnet**: $0.003 per 1K input tokens + $0.015 per 1K output tokens
+- **Average input**: 8,000 tokens (financial data + analysis results)
+- **Average output**: 2,000 tokens (investment rating + reasoning)
+- **Cost per run**: $0.054
+
+#### **DynamoDB**
+- **Read Capacity Units (RCU)**: 50 reads per run
+- **Write Capacity Units (WCU)**: 10 writes per run
+- **On-demand pricing**: $1.25 per million RCU, $6.25 per million WCU
+- **Cost per run**: $0.0000625
+
+#### **EventBridge**
+- **Custom events**: $1.00 per million events
+- **Cost per run**: $0.000001
+
+#### **CloudWatch & X-Ray**
+- **CloudWatch Logs**: $0.50 per GB ingested
+- **X-Ray Tracing**: $5.00 per million traces
+- **Estimated cost per run**: $0.0001
+
+### **Total Cost Per Analysis Run**
+| Component | Cost per Run |
+|-----------|--------------|
+| Lambda Functions | $0.0000132 |
+| Step Functions | $0.000375 |
+| Amazon Comprehend | $0.0025 |
+| SageMaker Endpoints | $0.00013 |
+| Amazon Bedrock | $0.054 |
+| DynamoDB | $0.0000625 |
+| EventBridge | $0.000001 |
+| CloudWatch & X-Ray | $0.0001 |
+| **Total per Run** | **$0.057** |
+
+### **AlphaVantage Rate Limit Analysis**
+
+#### **AlphaVantage Free Tier Limits**
+- **API Calls per minute**: 5 calls
+- **API Calls per day**: 25 calls
+- **API Calls per month**: 750 calls
+
+#### **API Calls Required Per Analysis**
+| Data Source | API Endpoint | Calls per Asset |
+|-------------|--------------|-----------------|
+| Company Overview | OVERVIEW | 1 |
+| Earnings | EARNINGS | 1 |
+| Income Statement | INCOME_STATEMENT | 1 |
+| Balance Sheet | BALANCE_SHEET | 1 |
+| Cash Flow | CASH_FLOW | 1 |
+| Earnings Call Scripts | EARNINGS_CALL_TRANSCRIPT | 1 |
+| **Total per Asset** | | **6 calls** |
+
+#### **Daily Analysis Capacity**
+- **Available API calls per day**: 25
+- **API calls per analysis**: 6
+- **Maximum analyses per day**: 4 analyses
+- **Recommended daily limit**: 3 analyses (25% buffer for retries)
+
+#### **Monthly Analysis Capacity**
+- **Available API calls per month**: 750
+- **API calls per analysis**: 6
+- **Maximum analyses per month**: 125 analyses
+- **Recommended monthly limit**: 100 analyses (20% buffer for retries)
+
+### **Cost Projections**
+
+#### **Daily Cost Scenarios**
+| Analyses per Day | Daily Cost | Monthly Cost | Annual Cost |
+|------------------|------------|--------------|-------------|
+| 1 | $0.057 | $1.71 | $20.52 |
+| 2 | $0.114 | $3.42 | $41.04 |
+| 3 (Max Capacity) | $0.171 | $5.13 | $61.56 |
+
+#### **Monthly Cost Breakdown (3 analyses/day)**
+| Component | Cost per Run | Daily Cost | Monthly Cost |
+|-----------|--------------|------------|--------------|
+| Lambda Functions | $0.0000132 | $0.00004 | $0.001 |
+| Step Functions | $0.000375 | $0.001 | $0.034 |
+| Amazon Comprehend | $0.0025 | $0.008 | $0.225 |
+| SageMaker Endpoints | $0.00013 | $0.0004 | $0.012 |
+| Amazon Bedrock | $0.054 | $0.162 | $4.86 |
+| DynamoDB | $0.0000625 | $0.0002 | $0.006 |
+| EventBridge | $0.000001 | $0.000003 | $0.00009 |
+| CloudWatch & X-Ray | $0.0001 | $0.0003 | $0.009 |
+| **Total** | **$0.057** | **$0.171** | **$5.13** |
+
+### **Cost Optimization Strategies**
+
+#### **1. Batch Processing**
+- **Current**: Individual asset analysis
+- **Optimized**: Batch 8 assets per Step Functions execution
+- **Cost Reduction**: 60% reduction in Step Functions costs
+- **New cost per run**: $0.023 (vs $0.057)
+
+#### **2. SageMaker Endpoint Optimization**
+- **Current**: Dedicated endpoints per model
+- **Optimized**: Multi-model endpoints
+- **Cost Reduction**: 40% reduction in SageMaker costs
+- **New cost per run**: $0.034 (vs $0.057)
+
+#### **3. Bedrock Token Optimization**
+- **Current**: Full context window usage
+- **Optimized**: Compressed prompts and selective data inclusion
+- **Cost Reduction**: 30% reduction in Bedrock costs
+- **New cost per run**: $0.040 (vs $0.057)
+
+#### **4. DynamoDB Optimization**
+- **Current**: On-demand pricing
+- **Optimized**: Provisioned capacity for predictable workloads
+- **Cost Reduction**: 50% reduction in DynamoDB costs
+- **New cost per run**: $0.054 (vs $0.057)
+
+### **Optimized Cost Projections**
+
+#### **Optimized Daily Cost Scenarios**
+| Analyses per Day | Optimized Daily Cost | Optimized Monthly Cost | Optimized Annual Cost |
+|------------------|---------------------|------------------------|----------------------|
+| 1 | $0.040 | $1.20 | $14.40 |
+| 2 | $0.080 | $2.40 | $28.80 |
+| 3 (Max Capacity) | $0.120 | $3.60 | $43.20 |
+
+### **Production Recommendations**
+
+#### **Phase 1: Development/Testing (First 3 months)**
+- **Target**: 1 analysis per day
+- **Monthly Cost**: $1.20 - $1.71
+- **Focus**: System validation and optimization
+
+#### **Phase 2: Beta Launch (Months 4-6)**
+- **Target**: 2 analyses per day
+- **Monthly Cost**: $2.40 - $3.42
+- **Focus**: User feedback and performance tuning
+
+#### **Phase 3: Production Scale (Month 7+)**
+- **Target**: 3 analyses per day (max capacity)
+- **Monthly Cost**: $3.60 - $5.13
+- **Focus**: Full production deployment within free tier limits
+
+#### **Phase 4: Paid Tier Scale (Future)**
+- **Target**: 10+ analyses per day (requires AlphaVantage paid plan)
+- **Monthly Cost**: $12.00+ (plus AlphaVantage subscription)
+- **Focus**: Scale beyond free tier limitations
+
+### **Rate Limit Management**
+
+#### **AlphaVantage API Call Distribution**
+- **Peak Hours**: 9 AM - 4 PM EST (trading hours)
+- **Off-Peak Hours**: 4 PM - 9 AM EST
+- **Recommended Distribution**: 60% peak, 40% off-peak
+
+#### **Daily Schedule Optimization**
+- **4:00 AM**: Asset sync (0 API calls)
+- **5:00 AM**: Earnings calendar sync (1 API call)
+- **6:00 AM**: Earnings-triggered pollination (variable)
+- **7:00 AM**: Regular pollination (variable)
+- **Hourly**: News sentiment sync (1 API call)
+- **Analysis runs**: Distributed throughout day
+
+#### **Retry Strategy**
+- **Exponential Backoff**: 1s, 2s, 4s, 8s, 16s
+- **Max Retries**: 3 attempts
+- **Rate Limit Buffer**: 20% of daily limit reserved for retries
+
+This cost analysis shows that the analysis workflow is highly cost-effective, with the main cost driver being Amazon Bedrock for AI-generated investment ratings. However, the AlphaVantage free tier severely limits capacity to only 3 analyses per day. The system can handle meaningful development and testing within these constraints, with monthly costs ranging from $1.20 to $5.13. For production scale, an AlphaVantage paid subscription would be required to increase the daily API call limit. 

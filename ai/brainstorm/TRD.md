@@ -19,29 +19,36 @@
   - Purpose: Synchronizes with Alpaca API to maintain current asset list
   - Dependencies: Alpaca API, DynamoDB, CloudWatch
   - Technical Constraints: Daily sync schedule, API rate limits, data validation
-  - Schedule: Daily at 5:00 AM
+  - Schedule: Daily at 4:00 AM
   - Process: Validates asset data and emits monitoring metrics
 
 - **Earnings Calendar Service**:
   - Purpose: Tracks upcoming earnings releases for proactive data updates
   - Dependencies: Alpha Vantage APIs, DynamoDB, CloudWatch
   - Technical Constraints: Daily sync schedule, API rate limits, date validation
-  - Schedule: Daily
+  - Schedule: Daily at 5:00 AM
   - Process: Validates earnings data and prioritizes assets for pollination
 
 - **Asset Data Processing Service**:
   - Purpose: Ingests and processes Alpha Vantage financial data
   - Dependencies: Alpha Vantage APIs, DynamoDB, analysis queue, CloudWatch
   - Technical Constraints: Rate limits on Alpha Vantage APIs, daily update cycles, data validation
-  - Schedule: Daily at 6:00 AM
+  - Schedule: Daily at 6:00 AM (earnings-triggered) and 7:00 AM (regular)
   - Process: Validates financial data, queues assets for analysis, emits monitoring metrics
 
 - **AI Analysis Engine**:
   - Purpose: Processes financial data to generate AI ratings and analysis
   - Dependencies: Financial data storage, AI/ML models, analysis results storage, analysis queue, CloudWatch
   - Technical Constraints: Processing time limits, model accuracy requirements, batch processing, data validation
-  - Schedule: Hourly
+  - Schedule: Event-driven (triggered by analysisNeeded events)
   - Process: Validates input data, retrieves queued assets, processes in batches of 8, validates AI output, generates analysis, emits monitoring metrics
+
+- **News Sentiment Service**:
+  - Purpose: Collects and processes news sentiment data for market analysis
+  - Dependencies: Alpha Vantage APIs, DynamoDB, CloudWatch
+  - Technical Constraints: Hourly sync schedule, API rate limits, sentiment analysis
+  - Schedule: Hourly (every hour)
+  - Process: Collects news data, matches to assets, stores sentiment analysis
 
 - **User Management Service**:
   - Purpose: Handles user authentication, profiles, and preferences
@@ -50,18 +57,35 @@
 
 - **Daily Briefing Service**:
   - Purpose: Generates personalized daily briefings for users
-  - Dependencies: User preferences, AI analysis data, news sentiment data
-  - Technical Constraints: Real-time data aggregation, personalization algorithms
+  - Dependencies: User preferences, AI analysis data, news sentiment data, watchlist data
+  - Technical Constraints: Real-time data aggregation, personalization algorithms, widget-based UI
+  - Features: 8 core widgets (Executive Summary, Watchlists Overview, Portfolio Analytics, Market Sentiment, Earnings Calendar, Market News, Personalized Insights)
+
+- **Asset Profile Service**:
+  - Purpose: Provides detailed asset-specific analysis and insights
+  - Dependencies: AI analysis data, news sentiment data, financial data, technical data
+  - Technical Constraints: Real-time data access, interactive UI components, chart rendering
+  - Features: 10 analysis components (Investment Rating, Financial Health, Risk Assessment, Sentiment Analysis, Peer Comparison, Earnings Analysis, News Feed, Technical Analysis, Management Analysis, Financial Modeling)
 
 - **Watchlist Management Service**:
   - Purpose: Manages user watchlists and portfolio tracking
   - Dependencies: User data, asset data, AI analysis data
-  - Technical Constraints: Real-time updates, user-specific data isolation
+  - Technical Constraints: Real-time updates, user-specific data isolation, multi-watchlist support
 
 - **Search and Discovery Service**:
   - Purpose: Provides fast asset search and filtering capabilities
   - Dependencies: Asset database, AI analysis data, search indexing
   - Technical Constraints: Sub-second query performance, semantic search capabilities
+
+- **Alert and Notification Service**:
+  - Purpose: Manages user alerts and notifications for rating changes, news events, and risk factors
+  - Dependencies: User preferences, AI analysis data, news sentiment data, EventBridge
+  - Technical Constraints: Real-time event processing, user preference filtering, notification delivery
+
+- **Data Visualization Service**:
+  - Purpose: Provides interactive charts, heat maps, and data visualization components
+  - Dependencies: Chart libraries, real-time data feeds, user interaction tracking
+  - Technical Constraints: Responsive design, interactive features, performance optimization
 
 ### Data Architecture
 
@@ -75,26 +99,26 @@
 
 **Users Table**:
 - Attributes: user_id (PK), email, first_name, last_name, birth_date, topics_of_interest, investment_knowledge_level, created_at, updated_at
-- Relationships: One-to-many with watchlists, user_preferences
+- Relationships: One-to-many with watchlists, user_preferences, user_alerts
 - Constraints: Unique email, required fields validation
 
 **Assets Table**:
-- Attributes: asset_id (PK), symbol, company_name, sector, industry, market_cap, last_updated
-- Relationships: One-to-many with asset_analysis, watchlist_items
+- Attributes: asset_id (PK), symbol, company_name, sector, industry, market_cap, last_updated, last_pollenation_date, status (active/inactive)
+- Relationships: One-to-many with asset_analysis, watchlist_items, asset_news, asset_earnings
 - Constraints: Unique symbol, required financial data
 
 **Asset AI Analysis Table**:
-- Attributes: analysis_id (PK), asset_id (FK), ai_rating, confidence_interval, rating_stability, pe_ratio, sector_avg_pe, sentiment_score, risk_score, financial_health_score, growth_score, debt_to_equity, current_ratio, roe, roa, profit_margin, revenue_growth_3yr, eps_growth_3yr, full_analysis_json, searchable_text, last_updated
+- Attributes: analysis_id (PK), asset_id (FK), ai_rating, confidence_interval, rating_stability, rating_components_json, rating_reasoning, pe_ratio, sector_avg_pe, sentiment_score, risk_score, financial_health_score, growth_score, debt_to_equity, current_ratio, roe, roa, profit_margin, revenue_growth_3yr, eps_growth_3yr, full_analysis_json, searchable_text, last_updated, rating_history_json
 - Relationships: Many-to-one with assets
-- Constraints: Daily updates, data validation
+- Constraints: Daily updates, data validation, rating range 1-5
 
 **Watchlists Table**:
-- Attributes: watchlist_id (PK), user_id (FK), name, description, created_at, updated_at
+- Attributes: watchlist_id (PK), user_id (FK), name, description, created_at, updated_at, is_default
 - Relationships: Many-to-one with users, one-to-many with watchlist_items
 - Constraints: User ownership, unique names per user
 
 **Watchlist Items Table**:
-- Attributes: item_id (PK), watchlist_id (FK), asset_id (FK), added_at, notes
+- Attributes: item_id (PK), watchlist_id (FK), asset_id (FK), added_at, notes, alert_preferences
 - Relationships: Many-to-one with watchlists and assets
 - Constraints: Unique asset per watchlist
 
@@ -103,14 +127,19 @@
 - Relationships: Many-to-one with users
 - Constraints: User ownership, preference validation
 
+**User Alerts Table**:
+- Attributes: alert_id (PK), user_id (FK), asset_id (FK), alert_type (rating_change, news_event, risk_factor, earnings), alert_conditions, is_active, created_at, updated_at
+- Relationships: Many-to-one with users and assets
+- Constraints: User ownership, alert type validation
+
 **News Sentiment Table**:
-- Attributes: news_id (PK), time_published (SK), asset_symbol, title, url, overall_sentiment_score, overall_sentiment_label, ticker_sentiment_json, relevance_score, related_assets, source, summary, last_sync_timestamp, created_at, updated_at
+- Attributes: news_id (PK), time_published (SK), asset_symbol, title, url, overall_sentiment_score, overall_sentiment_label, ticker_sentiment_json, relevance_score, related_assets, source, summary, last_sync_timestamp, created_at, updated_at, news_category, market_impact
 - Relationships: Many-to-many with assets (news can mention multiple assets)
 - Constraints: Real-time updates, sentiment validation, hourly sync schedule
-- Indexes: asset-news-index (by asset_symbol + time_published), sentiment-score-index (by sentiment_score + time_published)
+- Indexes: asset-news-index (by asset_symbol + time_published), sentiment-score-index (by sentiment_score + time_published), category-index (by news_category + time_published)
 
 **Earnings Calendar Table**:
-- Attributes: calendar_id (PK), asset_id (FK), earnings_date, report_time (pre-market/post-market), estimated_eps, actual_eps, surprise, surprise_percentage, created_at, updated_at
+- Attributes: calendar_id (PK), asset_id (FK), earnings_date, report_time (pre-market/post-market), estimated_eps, actual_eps, surprise, surprise_percentage, created_at, updated_at, is_processed
 - Relationships: Many-to-one with assets
 - Constraints: Unique earnings per asset per date, date validation
 
@@ -118,6 +147,31 @@
 - Attributes: queue_id (PK), asset_id (FK), priority (high/normal/low), queued_at, scheduled_for, retry_count, last_attempt, status (pending/processing/completed/failed), error_message, validation_status
 - Relationships: Many-to-one with assets
 - Constraints: Unique asset per queue, status validation
+
+**Financial Data Table**:
+- Attributes: financial_id (PK), asset_id (FK), data_type (income_statement, balance_sheet, cash_flow, company_overview), period_end_date, data_json, last_updated
+- Relationships: Many-to-one with assets
+- Constraints: Data type validation, date consistency
+
+**Technical Analysis Table**:
+- Attributes: technical_id (PK), asset_id (FK), timeframe, price_data_json, indicators_json, patterns_json, support_resistance_json, last_updated
+- Relationships: Many-to-one with assets
+- Constraints: Timeframe validation, data completeness
+
+**Peer Comparison Table**:
+- Attributes: comparison_id (PK), asset_id (FK), sector_rankings_json, valuation_comparison_json, growth_comparison_json, competitive_analysis_json, last_updated
+- Relationships: Many-to-one with assets
+- Constraints: Data validation, sector consistency
+
+**Daily Briefing Cache Table**:
+- Attributes: briefing_id (PK), user_id (FK), briefing_date, widget_data_json, last_generated, expires_at
+- Relationships: Many-to-one with users
+- Constraints: Daily generation, cache expiration
+
+**Asset Profile Cache Table**:
+- Attributes: profile_id (PK), asset_id (FK), profile_data_json, last_generated, expires_at
+- Relationships: Many-to-one with assets
+- Constraints: Cache expiration, data freshness
 
 **Storage Solutions**:
 - **Primary Storage**: DynamoDB for all structured data with auto-scaling
@@ -151,15 +205,51 @@
 - `DELETE /watchlists/{id}/assets/{asset_id}` - Remove asset from watchlist
 
 **Daily Briefing Endpoints**:
-- `GET /briefing/daily` - Get personalized daily briefing
+- `GET /briefing/daily` - Get personalized daily briefing with all 8 widgets
+- `GET /briefing/widgets/{widget_name}` - Get specific widget data (executive_summary, watchlists, portfolio_analytics, market_sentiment, earnings_calendar, market_news, personalized_insights)
 - `GET /briefing/news` - Get personalized news feed
 - `GET /briefing/market-overview` - Get market overview data
+- `PUT /briefing/layout` - Update user's widget layout preferences
+- `GET /briefing/export` - Export briefing data as PDF/CSV
+
+**Asset Profile Endpoints**:
+- `GET /assets/{symbol}/profile` - Get comprehensive asset profile with all 10 analysis components
+- `GET /assets/{symbol}/rating` - Get detailed investment rating and components
+- `GET /assets/{symbol}/financial-health` - Get financial health analysis
+- `GET /assets/{symbol}/risk-assessment` - Get risk assessment details
+- `GET /assets/{symbol}/sentiment` - Get sentiment analysis
+- `GET /assets/{symbol}/peer-comparison` - Get peer comparison analysis
+- `GET /assets/{symbol}/earnings` - Get earnings analysis and history
+- `GET /assets/{symbol}/news` - Get asset-specific news feed
+- `GET /assets/{symbol}/technical` - Get technical analysis
+- `GET /assets/{symbol}/management` - Get management and strategy analysis
+- `GET /assets/{symbol}/financial-modeling` - Get financial projections and valuations
+- `GET /assets/{symbol}/export` - Export asset analysis as PDF/CSV
 
 **AI Analysis Endpoints**:
 - `GET /analysis/assets/{symbol}` - Get comprehensive AI analysis
 - `GET /analysis/sentiment/{symbol}` - Get sentiment analysis
 - `GET /analysis/risk/{symbol}` - Get risk assessment
 - `GET /analysis/peers/{symbol}` - Get peer comparison
+- `GET /analysis/financial-health/{symbol}` - Get financial health analysis
+- `GET /analysis/earnings-quality/{symbol}` - Get earnings quality assessment
+- `GET /analysis/valuation/{symbol}` - Get valuation models and fair value estimates
+
+**Alert and Notification Endpoints**:
+- `GET /alerts` - Get user's active alerts
+- `POST /alerts` - Create new alert
+- `PUT /alerts/{alert_id}` - Update alert
+- `DELETE /alerts/{alert_id}` - Delete alert
+- `GET /alerts/types` - Get available alert types and conditions
+- `POST /alerts/test` - Test alert conditions
+
+**Data Visualization Endpoints**:
+- `GET /charts/{symbol}/price` - Get price chart data
+- `GET /charts/{symbol}/technical` - Get technical indicators
+- `GET /charts/portfolio/performance` - Get portfolio performance charts
+- `GET /charts/portfolio/sector-allocation` - Get sector allocation charts
+- `GET /charts/portfolio/risk-distribution` - Get risk distribution charts
+- `GET /charts/market/sentiment` - Get market sentiment charts
 
 **Request/Response Format**:
 - **Request Format**: JSON with standard HTTP headers
@@ -225,6 +315,54 @@
 - **Accuracy Testing**: Backtest AI ratings against historical performance
 - **Model Validation**: Cross-validation of AI analysis components
 - **Performance Monitoring**: Track rating accuracy and drift over time
+- **Component Testing**: Individual testing of financial health, risk assessment, sentiment analysis, and peer comparison models
+- **Integration Testing**: End-to-end testing of complete AI analysis pipeline
+- **A/B Testing**: Compare different model versions for rating accuracy
+
+**AI Model Specifications**:
+
+**Investment Rating Model**:
+- **Input**: Financial metrics, sentiment data, peer comparison data, market data
+- **Output**: 1-5 scale rating with confidence interval and component breakdown
+- **Components**: Financial health (30%), growth potential (25%), risk assessment (20%), market sentiment (15%), peer comparison (10%)
+- **Training**: Historical financial data with subsequent performance outcomes
+- **Validation**: Cross-validation with out-of-sample testing
+
+**Financial Health Model**:
+- **Input**: Balance sheet, income statement, cash flow data
+- **Output**: 1-5 scale health score with detailed metrics
+- **Metrics**: P/E, P/B, EV/EBITDA, ROE, ROA, debt ratios, cash flow metrics
+- **Training**: Historical financial data with bankruptcy/success outcomes
+- **Validation**: Financial distress prediction accuracy
+
+**Risk Assessment Model**:
+- **Input**: Financial metrics, market data, industry data, news sentiment
+- **Output**: 1-5 scale risk score with specific risk factors
+- **Factors**: Financial risk, business risk, market risk, regulatory risk
+- **Training**: Historical data with volatility and drawdown outcomes
+- **Validation**: Risk prediction accuracy and factor identification
+
+**Sentiment Analysis Model**:
+- **Input**: News articles, social media data, analyst reports
+- **Output**: Sentiment score (Bullish/Neutral/Bearish) with confidence
+- **Processing**: NLP analysis with relevance scoring and impact assessment
+- **Training**: News data with subsequent price movement outcomes
+- **Validation**: Sentiment prediction accuracy and relevance scoring
+
+**Peer Comparison Model**:
+- **Input**: Asset metrics, sector data, industry benchmarks
+- **Output**: Sector rankings, relative performance metrics, competitive analysis
+- **Analysis**: Percentile rankings, relative valuation, growth comparison
+- **Training**: Historical sector performance data
+- **Validation**: Relative performance prediction accuracy
+
+**Technical Analysis Model**:
+- **Input**: Price data, volume data, market indicators
+- **Output**: Technical indicators, pattern recognition, support/resistance levels
+- **Indicators**: Moving averages, RSI, MACD, Bollinger Bands, volume analysis
+- **Patterns**: Chart patterns, trend analysis, breakout detection
+- **Training**: Historical price data with pattern outcomes
+- **Validation**: Pattern recognition accuracy and signal quality
 
 ### Data Validation and Quality Assurance
 
@@ -371,11 +509,11 @@
 - **Purpose**: Synchronize with Alpaca API to get latest tradable assets
 - **Trigger**: Daily cron schedule
 - **Process**: 
-  - Call Alpaca `/v2/assets` endpoint
+  - Call Alpaca `/v2/assets?status=active` endpoint
   - Validate asset data (symbol format, required fields)
   - Sync with assets table (add new, update existing, mark inactive)
   - Emit CloudWatch metrics for sync results
-- **Output**: Updated assets table with latest tradable securities
+- **Output**: Updated assets table with latest active tradable securities
 - **Validation**: Symbol format, required fields, data completeness
 
 **Daily Earnings Calendar Sync (5:00 AM)**:
@@ -467,6 +605,46 @@ Event-Driven: pollenationNeeded → PollenateAsset → analysisNeeded → Analyz
 Event-Driven: earningsProcessed → markEarningsProcessed → Update EarningsCalendar
 ```
 
+### Frontend Technical Requirements
+
+**Technology Stack**:
+- **Framework**: React 18+ with TypeScript
+- **State Management**: Redux Toolkit for global state, React Query for server state
+- **UI Library**: Material-UI (MUI) or Ant Design for component library
+- **Charts**: Chart.js, D3.js, or TradingView for financial charts
+- **Build Tool**: Vite for fast development and optimized builds
+- **Testing**: Jest and React Testing Library for unit and integration tests
+
+**Daily Briefing UI Requirements**:
+- **Widget System**: Drag-and-drop widget layout with 8 core widgets
+- **Responsive Design**: Mobile-first design supporting desktop, tablet, and mobile
+- **Real-time Updates**: WebSocket connections for live data updates
+- **Personalization**: User-configurable widget layouts and preferences
+- **Performance**: Sub-2-second page load times, smooth interactions
+- **Accessibility**: WCAG 2.1 AA compliance for all components
+
+**Asset Profile UI Requirements**:
+- **Tabbed Interface**: 10 analysis components in organized tabs
+- **Interactive Charts**: Zoom, pan, and customize chart views
+- **Data Tables**: Sortable and filterable data tables with export capabilities
+- **Comparison Tools**: Side-by-side asset comparison functionality
+- **Alert Management**: Inline alert creation and management
+- **Print/Export**: PDF generation and data export capabilities
+
+**Data Visualization Requirements**:
+- **Chart Types**: Line charts, candlestick charts, heat maps, radar charts, bar charts
+- **Interactive Features**: Tooltips, zoom, pan, time range selection
+- **Real-time Data**: Live price updates and indicator calculations
+- **Performance**: Smooth 60fps animations, efficient data rendering
+- **Mobile Optimization**: Touch-friendly interactions and responsive layouts
+
+**User Experience Requirements**:
+- **Navigation**: Intuitive breadcrumb navigation and search functionality
+- **Loading States**: Skeleton screens and progress indicators
+- **Error Handling**: User-friendly error messages and recovery options
+- **Notifications**: Toast notifications for alerts and system messages
+- **Offline Support**: Basic offline functionality with cached data
+
 ### Scalability Requirements
 
 **Performance Targets**:
@@ -474,6 +652,7 @@ Event-Driven: earningsProcessed → markEarningsProcessed → Update EarningsCal
 - **Data Volume**: Handle 10,000+ assets with daily updates
 - **Response Times**: Sub-second API responses for 95% of requests
 - **Throughput**: 10,000+ API requests per minute
+- **Frontend Performance**: Sub-2-second page loads, smooth 60fps interactions
 
 **Auto-scaling**:
 - **Lambda Functions**: Auto-scale based on request volume
@@ -514,16 +693,26 @@ Hourly: AI Processing → Retrieve Queue → Batch Processing → AI Analysis �
 ### External Dependencies
 
 **Alpha Vantage APIs**:
-- **Rate Limits**: 5 API calls per minute, 500 per day (free tier)
+- **Rate Limits**: 5 API calls per minute, 25 per day (free tier)
 - **Data Types**: Company overview, financial statements, earnings (news sentiment handled separately via hourly sync)
 - **Error Handling**: Graceful degradation when APIs are unavailable
 - **Caching**: Cache API responses to minimize rate limit impact
+- **Cost Optimization**: Single API call per hour for news sentiment, batch processing for financial data
+- **Capacity Planning**: Maximum 25 analysis runs per day under free tier limits
+
+**Cost Estimation**:
+- **Per Analysis Run**: ~$0.15-0.25 (Lambda + AI processing + data storage)
+- **Daily Capacity**: 25 analysis runs (AlphaVantage free tier limit)
+- **Monthly Cost**: ~$375-625 for full daily capacity
+- **Scaling Costs**: Additional AlphaVantage API plans for higher capacity
+- **Infrastructure Costs**: AWS Lambda, DynamoDB, CloudWatch, EventBridge (~$200-400/month for 1,000 users)
 
 **Alpaca API Integration**:
-- **Asset Data**: `/v2/assets` endpoint for tradable securities
+- **Asset Data**: `/v2/assets?status=active` endpoint for active tradable securities
 - **Rate Limits**: 200 requests per minute
 - **Data Types**: Asset symbols, names, status, tradability
-- **Sync Strategy**: Daily sync to maintain current asset list
+- **Sync Strategy**: Daily sync to maintain current active asset list
+- **Filtering**: Only retrieve active assets to reduce data volume and processing
 
 **Auth0 Integration**:
 - **Authentication**: JWT token-based authentication
