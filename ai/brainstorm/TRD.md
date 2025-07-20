@@ -36,19 +36,12 @@
   - Schedule: Daily at 6:00 AM (earnings-triggered) and 7:00 AM (regular)
   - Process: Validates financial data, queues assets for analysis, emits monitoring metrics
 
-- **AI Analysis Engine**:
-  - Purpose: Processes financial data to generate AI ratings and analysis
-  - Dependencies: Financial data storage, AI/ML models, analysis results storage, analysis queue, CloudWatch
-  - Technical Constraints: Processing time limits, model accuracy requirements, batch processing, data validation
+- **Rule-Based Analysis Engine**:
+  - Purpose: Processes financial data to generate investment ratings and analysis using rule-based algorithms
+  - Dependencies: Financial data storage, analysis results storage, analysis queue, CloudWatch
+  - Technical Constraints: Processing time limits, algorithm accuracy requirements, batch processing, data validation
   - Schedule: Event-driven (triggered by analysisNeeded events)
-  - Process: Validates input data, retrieves queued assets, processes in batches of 8, validates AI output, generates analysis, emits monitoring metrics
-
-- **News Sentiment Service**:
-  - Purpose: Collects and processes news sentiment data for market analysis
-  - Dependencies: Alpha Vantage APIs, DynamoDB, CloudWatch
-  - Technical Constraints: Hourly sync schedule, API rate limits, sentiment analysis
-  - Schedule: Hourly (every hour)
-  - Process: Collects news data, matches to assets, stores sentiment analysis
+  - Process: Validates input data, retrieves queued assets, processes in batches of 8, validates analysis output, generates analysis, emits monitoring metrics
 
 - **User Management Service**:
   - Purpose: Handles user authentication, profiles, and preferences
@@ -57,41 +50,41 @@
 
 - **Daily Briefing Service**:
   - Purpose: Generates personalized daily briefings for users
-  - Dependencies: User preferences, AI analysis data, news sentiment data, watchlist data
+  - Dependencies: User preferences, analysis data, watchlist data
   - Technical Constraints: Real-time data aggregation, personalization algorithms, widget-based UI
-  - Features: 8 core widgets (Executive Summary, Watchlists Overview, Portfolio Analytics, Market Sentiment, Earnings Calendar, Market News, Personalized Insights)
+  - Features: 8 core widgets (Executive Summary, Watchlists Overview, Portfolio Analytics, Market Overview, Earnings Calendar, Market News, Personalized Insights)
 
 - **Asset Profile Service**:
   - Purpose: Provides detailed asset-specific analysis and insights
-  - Dependencies: AI analysis data, news sentiment data, financial data, technical data
-  - Technical Constraints: Real-time data access, interactive UI components, chart rendering
-  - Features: 10 analysis components (Investment Rating, Financial Health, Risk Assessment, Sentiment Analysis, Peer Comparison, Earnings Analysis, News Feed, Technical Analysis, Management Analysis, Financial Modeling)
+  - Dependencies: Analysis data, financial data, fundamental data
+  - Technical Constraints: Interactive UI components, chart rendering, walk-through wizard functionality
+  - Features: 10 analysis components (Investment Rating, Financial Health, Risk Assessment, Market Analysis, Peer Comparison, Earnings Analysis, News Feed, Technical Analysis, Management Analysis, Financial Modeling) with first-time user onboarding wizard
 
 - **Watchlist Management Service**:
   - Purpose: Manages user watchlists and portfolio tracking
-  - Dependencies: User data, asset data, AI analysis data
-  - Technical Constraints: Real-time updates, user-specific data isolation, multi-watchlist support
+  - Dependencies: User data, asset data, analysis data
+  - Technical Constraints: User-specific data isolation, multi-watchlist support
 
 - **Search and Discovery Service**:
   - Purpose: Provides fast asset search and filtering capabilities
-  - Dependencies: Asset database, AI analysis data, search indexing
+  - Dependencies: Asset database, analysis data, search indexing
   - Technical Constraints: Sub-second query performance, semantic search capabilities
 
 - **Alert and Notification Service**:
   - Purpose: Manages user alerts and notifications for rating changes, news events, and risk factors
-  - Dependencies: User preferences, AI analysis data, news sentiment data, EventBridge
+  - Dependencies: User preferences, analysis data, EventBridge
   - Technical Constraints: Real-time event processing, user preference filtering, notification delivery
 
 - **Data Visualization Service**:
   - Purpose: Provides interactive charts, heat maps, and data visualization components
-  - Dependencies: Chart libraries, real-time data feeds, user interaction tracking
+  - Dependencies: Chart libraries, fundamental data feeds, user interaction tracking
   - Technical Constraints: Responsive design, interactive features, performance optimization
 
 ### Data Architecture
 
 **Data Storage Strategy**:
 - **Primary Storage**: DynamoDB for all structured data and fast queries
-- **Secondary Storage**: S3 for full AI analysis JSON objects and large files
+- **Secondary Storage**: S3 for full rule-based analysis JSON objects and large files
 - **Search Index**: OpenSearch/Elasticsearch for semantic search capabilities
 - **Caching**: ElastiCache Redis for frequently accessed data
 
@@ -107,8 +100,8 @@
 - Relationships: One-to-many with asset_analysis, watchlist_items, asset_news, asset_earnings
 - Constraints: Unique symbol, required financial data
 
-**Asset AI Analysis Table**:
-- Attributes: analysis_id (PK), asset_id (FK), ai_rating, confidence_interval, rating_stability, rating_components_json, rating_reasoning, pe_ratio, sector_avg_pe, sentiment_score, risk_score, financial_health_score, growth_score, debt_to_equity, current_ratio, roe, roa, profit_margin, revenue_growth_3yr, eps_growth_3yr, full_analysis_json, searchable_text, last_updated, rating_history_json
+**Asset Analysis Table**:
+- Attributes: analysis_id (PK), asset_id (FK), investment_rating, confidence_interval, rating_stability, rating_components_json, rating_reasoning, pe_ratio, sector_avg_pe, market_score, risk_score, financial_health_score, growth_score, debt_to_equity, current_ratio, roe, roa, profit_margin, revenue_growth_3yr, eps_growth_3yr, full_analysis_json, searchable_text, last_updated, rating_history_json
 - Relationships: Many-to-one with assets
 - Constraints: Daily updates, data validation, rating range 1-5
 
@@ -132,11 +125,11 @@
 - Relationships: Many-to-one with users and assets
 - Constraints: User ownership, alert type validation
 
-**News Sentiment Table**:
-- Attributes: news_id (PK), time_published (SK), asset_symbol, title, url, overall_sentiment_score, overall_sentiment_label, ticker_sentiment_json, relevance_score, related_assets, source, summary, last_sync_timestamp, created_at, updated_at, news_category, market_impact
+**News Table**:
+- Attributes: news_id (PK), time_published (SK), asset_symbol, title, url, relevance_score, related_assets, source, summary, last_sync_timestamp, created_at, updated_at, news_category, market_impact
 - Relationships: Many-to-many with assets (news can mention multiple assets)
-- Constraints: Real-time updates, sentiment validation, hourly sync schedule
-- Indexes: asset-news-index (by asset_symbol + time_published), sentiment-score-index (by sentiment_score + time_published), category-index (by news_category + time_published)
+- Constraints: Real-time updates, relevance validation
+- Indexes: asset-news-index (by asset_symbol + time_published), category-index (by news_category + time_published)
 
 **Earnings Calendar Table**:
 - Attributes: calendar_id (PK), asset_id (FK), earnings_date, report_time (pre-market/post-market), estimated_eps, actual_eps, surprise, surprise_percentage, created_at, updated_at, is_processed
@@ -176,8 +169,8 @@
 **Storage Solutions**:
 - **Primary Storage**: DynamoDB for all structured data with auto-scaling
 - **Secondary Storage**: S3 for large JSON objects and historical data
-- **Caching Strategy**: Redis for AI ratings, sector averages, user preferences
-- **Data Retention Requirements**: 2+ years for AI analysis, 5+ years for financial data, 90 days for news sentiment
+- **Caching Strategy**: Redis for investment ratings, sector averages, user preferences
+- **Data Retention Requirements**: 2+ years for analysis data, 5+ years for financial data, 90 days for news data
 
 ### API Specifications
 
@@ -192,7 +185,7 @@
 **Asset Management Endpoints**:
 - `GET /assets` - List assets with filtering and pagination
 - `GET /assets/{symbol}` - Get asset details
-- `GET /assets/{symbol}/analysis` - Get AI analysis for asset
+- `GET /assets/{symbol}/analysis` - Get rule-based analysis for asset
 - `GET /assets/search` - Search assets by criteria
 - `GET /assets/sectors` - Get sector performance data
 
@@ -206,7 +199,7 @@
 
 **Daily Briefing Endpoints**:
 - `GET /briefing/daily` - Get personalized daily briefing with all 8 widgets
-- `GET /briefing/widgets/{widget_name}` - Get specific widget data (executive_summary, watchlists, portfolio_analytics, market_sentiment, earnings_calendar, market_news, personalized_insights)
+- `GET /briefing/widgets/{widget_name}` - Get specific widget data (executive_summary, watchlists, portfolio_analytics, market_overview, earnings_calendar, market_news, personalized_insights)
 - `GET /briefing/news` - Get personalized news feed
 - `GET /briefing/market-overview` - Get market overview data
 - `PUT /briefing/layout` - Update user's widget layout preferences
@@ -217,7 +210,7 @@
 - `GET /assets/{symbol}/rating` - Get detailed investment rating and components
 - `GET /assets/{symbol}/financial-health` - Get financial health analysis
 - `GET /assets/{symbol}/risk-assessment` - Get risk assessment details
-- `GET /assets/{symbol}/sentiment` - Get sentiment analysis
+- `GET /assets/{symbol}/market-analysis` - Get market analysis
 - `GET /assets/{symbol}/peer-comparison` - Get peer comparison analysis
 - `GET /assets/{symbol}/earnings` - Get earnings analysis and history
 - `GET /assets/{symbol}/news` - Get asset-specific news feed
@@ -226,9 +219,9 @@
 - `GET /assets/{symbol}/financial-modeling` - Get financial projections and valuations
 - `GET /assets/{symbol}/export` - Export asset analysis as PDF/CSV
 
-**AI Analysis Endpoints**:
-- `GET /analysis/assets/{symbol}` - Get comprehensive AI analysis
-- `GET /analysis/sentiment/{symbol}` - Get sentiment analysis
+**Rule-Based Analysis Endpoints**:
+- `GET /analysis/assets/{symbol}` - Get comprehensive rule-based analysis
+- `GET /analysis/market/{symbol}` - Get market analysis
 - `GET /analysis/risk/{symbol}` - Get risk assessment
 - `GET /analysis/peers/{symbol}` - Get peer comparison
 - `GET /analysis/financial-health/{symbol}` - Get financial health analysis
@@ -249,7 +242,7 @@
 - `GET /charts/portfolio/performance` - Get portfolio performance charts
 - `GET /charts/portfolio/sector-allocation` - Get sector allocation charts
 - `GET /charts/portfolio/risk-distribution` - Get risk distribution charts
-- `GET /charts/market/sentiment` - Get market sentiment charts
+- `GET /charts/market/overview` - Get market overview charts
 
 **Request/Response Format**:
 - **Request Format**: JSON with standard HTTP headers
@@ -278,7 +271,7 @@
   - Data in transit: TLS 1.3
   - Database encryption: DynamoDB encryption at rest
 - **Data Classification**: 
-  - Public: Asset financial data, AI analysis
+  - Public: Asset financial data, rule-based analysis
   - Private: User profiles, watchlists, preferences
   - Sensitive: Authentication tokens, personal information
 - **Compliance Requirements**: 
@@ -308,61 +301,59 @@
 - **Benchmarks**: 
   - API response time: <500ms for 95% of requests
   - Database queries: <100ms for simple queries
-  - AI analysis generation: <30 seconds per asset
+  - Rule-based analysis generation: <30 seconds per asset
 - **Tools**: Artillery for load testing, AWS X-Ray for performance monitoring
 
-**AI Model Testing**:
-- **Accuracy Testing**: Backtest AI ratings against historical performance
-- **Model Validation**: Cross-validation of AI analysis components
-- **Performance Monitoring**: Track rating accuracy and drift over time
+**Rule-Based Analysis Testing**:
 - **Component Testing**: Individual testing of financial health, risk assessment, sentiment analysis, and peer comparison models
-- **Integration Testing**: End-to-end testing of complete AI analysis pipeline
-- **A/B Testing**: Compare different model versions for rating accuracy
+- **Integration Testing**: End-to-end testing of complete rule-based analysis pipeline
+- **Rule Validation**: Verify mathematical accuracy and logical consistency of rule calculations
+- **Performance Testing**: Ensure analysis generation meets performance requirements
 
-**AI Model Specifications**:
+**Rule-Based Analysis Model Specifications**:
 
 **Investment Rating Model**:
-- **Input**: Financial metrics, sentiment data, peer comparison data, market data
+- **Input**: Financial metrics, market data, peer comparison data
 - **Output**: 1-5 scale rating with confidence interval and component breakdown
-- **Components**: Financial health (30%), growth potential (25%), risk assessment (20%), market sentiment (15%), peer comparison (10%)
-- **Training**: Historical financial data with subsequent performance outcomes
-- **Validation**: Cross-validation with out-of-sample testing
+- **Components**: Financial health (30%), growth potential (25%), risk assessment (20%), market analysis (15%), peer comparison (10%)
+- **Algorithm**: Rule-based scoring with weighted component analysis
+- **Validation**: Mathematical accuracy verification and logical consistency checks
 
 **Financial Health Model**:
 - **Input**: Balance sheet, income statement, cash flow data
 - **Output**: 1-5 scale health score with detailed metrics
 - **Metrics**: P/E, P/B, EV/EBITDA, ROE, ROA, debt ratios, cash flow metrics
-- **Training**: Historical financial data with bankruptcy/success outcomes
-- **Validation**: Financial distress prediction accuracy
+- **Algorithm**: Rule-based financial ratio analysis with industry benchmarks
+- **Validation**: Mathematical accuracy verification and ratio calculation validation
 
 **Risk Assessment Model**:
-- **Input**: Financial metrics, market data, industry data, news sentiment
+- **Input**: Financial metrics, market data, industry data
 - **Output**: 1-5 scale risk score with specific risk factors
 - **Factors**: Financial risk, business risk, market risk, regulatory risk
-- **Training**: Historical data with volatility and drawdown outcomes
-- **Validation**: Risk prediction accuracy and factor identification
+- **Algorithm**: Rule-based risk factor identification and scoring
+- **Validation**: Mathematical accuracy verification and risk factor calculation validation
 
-**Sentiment Analysis Model**:
-- **Input**: News articles, social media data, analyst reports
-- **Output**: Sentiment score (Bullish/Neutral/Bearish) with confidence
-- **Processing**: NLP analysis with relevance scoring and impact assessment
-- **Training**: News data with subsequent price movement outcomes
-- **Validation**: Sentiment prediction accuracy and relevance scoring
+**Market Analysis Model**:
+- **Input**: News articles, analyst reports, market data
+- **Output**: Market score (1-5) with confidence
+- **Processing**: News relevance scoring and impact assessment
+- **Algorithm**: Rule-based news analysis and market trend assessment
+- **Validation**: Mathematical accuracy verification and scoring algorithm validation
 
 **Peer Comparison Model**:
 - **Input**: Asset metrics, sector data, industry benchmarks
 - **Output**: Sector rankings, relative performance metrics, competitive analysis
 - **Analysis**: Percentile rankings, relative valuation, growth comparison
-- **Training**: Historical sector performance data
-- **Validation**: Relative performance prediction accuracy
+- **Algorithm**: Rule-based comparative analysis with sector benchmarks
+- **Validation**: Mathematical accuracy verification and percentile calculation validation
 
 **Technical Analysis Model**:
 - **Input**: Price data, volume data, market indicators
 - **Output**: Technical indicators, pattern recognition, support/resistance levels
 - **Indicators**: Moving averages, RSI, MACD, Bollinger Bands, volume analysis
 - **Patterns**: Chart patterns, trend analysis, breakout detection
-- **Training**: Historical price data with pattern outcomes
-- **Validation**: Pattern recognition accuracy and signal quality
+- **Algorithm**: Rule-based technical indicator calculation and pattern recognition
+- **Validation**: Mathematical accuracy verification and indicator calculation validation
 
 ### Data Validation and Quality Assurance
 
@@ -384,8 +375,8 @@
 - **Data Consistency**: Estimated vs. actual EPS relationships
 - **Report Times**: Valid pre-market/post-market designations
 
-**AI Analysis Validation**:
-- **Rating Ranges**: AI ratings within 1-5 scale
+**Rule-Based Analysis Validation**:
+- **Rating Ranges**: Rule-based ratings within 1-5 scale
 - **Confidence Scores**: Confidence intervals within 0-100%
 - **Required Fields**: All analysis components present
 - **Logical Consistency**: Risk scores align with financial health metrics
@@ -403,7 +394,7 @@
 **Data Ingestion Metrics**:
 - `AssetSyncSuccess` / `AssetSyncFailure` (Count)
 - `EarningsCalendarSyncSuccess` / `EarningsCalendarSyncFailure` (Count)
-- `NewsSentimentSyncSuccess` / `NewsSentimentSyncFailure` (Count)
+
 - `DataPollinationSuccess` / `DataPollinationFailure` (Count)
 - `AssetsProcessed` / `AssetsFailed` (Count)
 - `QueueDepth` (Gauge)
@@ -419,16 +410,14 @@
 - `ValidationSuccess` / `ValidationFailure` (Count)
 - `DataCompleteness` (Percentage)
 - `DataFreshness` (Age in hours)
-- `AIAnalysisAccuracy` (Percentage)
+- `RuleBasedAnalysisSuccess` (Percentage)
 
 **Processing Pipeline Metrics**:
 - `BatchProcessingTime` (Histogram)
 - `BatchSize` (Gauge)
 - `QueueProcessingRate` (Rate)
 - `RetryCount` (Histogram)
-- `NewsRecordsProcessed` / `NewsRecordsFailed` (Count)
-- `NewsArticlesPerHour` (Gauge)
-- `AssetMatchesFound` (Count)
+
 
 **CloudWatch Dashboard - Data Ingestion Flow**:
 - **Real-time Queue Depth**: Number of pending analysis items
@@ -444,7 +433,7 @@
 - API error rate > 5%
 - Validation failure rate > 15%
 - Processing time > 5 minutes per batch
-- News sentiment sync failure rate > 20%
+
 - AlphaVantage API rate limit hits > 1 per hour (should never happen with single call)
 
 **Logging**:
@@ -454,11 +443,11 @@
 - **Log Structure**: JSON format with correlation IDs for request tracking
 - **Validation Logs**: Detailed validation failure reasons and data samples
 
-**AI Model Monitoring**:
-- **Model Performance**: Track rating accuracy, sentiment analysis quality
+**Analysis Model Monitoring**:
+- **Model Performance**: Track rating accuracy, analysis quality
 - **Data Quality**: Monitor Alpha Vantage data completeness and accuracy
-- **Drift Detection**: Alert on significant changes in AI model performance
-- **User Feedback**: Track user interactions with AI recommendations
+- **Drift Detection**: Alert on significant changes in analysis model performance
+- **User Feedback**: Track user interactions with analysis recommendations
 - **Processing Efficiency**: Monitor batch processing times and success rates
 
 ### Disaster Recovery

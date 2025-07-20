@@ -1,10 +1,10 @@
 # Signal9 Advisor - Project Roadmap
 
 ## Project Overview
-Signal9 Advisor is a comprehensive financial analysis platform that provides AI-powered investment insights through automated data processing, sentiment analysis, and personalized recommendations. The platform leverages real-time financial data, news sentiment, and advanced analytics to deliver actionable investment intelligence.
+Signal9 Advisor is an open source cloud-based investment analysis platform that provides comprehensive fundamental data analytics and insights. The platform leverages rule-based analysis of fundamental financial data to deliver educational insights for informed investment decision-making. This roadmap covers Epic 1: Foundational Data Analysis (Rule-Based).
 
 ## Architecture Vision
-The platform is built on a robust, event-driven architecture that efficiently processes financial data from multiple sources while maintaining data quality and system reliability. The architecture emphasizes scalability, cost-effectiveness, and real-time responsiveness.
+The platform is built on a robust, event-driven architecture that efficiently processes fundamental financial data from AlphaVantage while maintaining data quality and system reliability. The architecture emphasizes scalability, cost-effectiveness, and educational value delivery.
 
 ## Phase Structure
 
@@ -12,89 +12,105 @@ The platform is built on a robust, event-driven architecture that efficiently pr
 **Focus**: Establish the foundational infrastructure and data processing pipeline
 
 **Key Components**:
-- **Event-Driven Architecture**: Separate trigger and processing functions
+- **Event-Driven Architecture**: Separate trigger and processing functions with EventBridge
 - **Smart Data Pollination**: Dual paths for regular and earnings-triggered updates
-- **API Rate Management**: Efficient handling of AlphaVantage and Alpaca APIs
+- **API Rate Management**: Efficient handling of AlphaVantage (25 calls/day) and Alpaca APIs
 - **Data Quality Assurance**: Comprehensive validation and monitoring
+
 
 **Critical Success Factors**:
 - Robust event-driven data processing pipeline
-- API rate limit compliance and optimization
+- API rate limit compliance and optimization (AlphaVantage free tier limits)
 - Data quality validation achieving >95% success rate
-- Real-time monitoring and observability
+- Comprehensive monitoring and observability
+- Cost optimization under API constraints
 
 **Deliverables**:
-- Complete AWS infrastructure deployment
-- Event-driven data processing pipeline
-- Data ingestion from multiple financial APIs
-- Comprehensive monitoring and alerting
-- Testing and validation framework
+- Complete AWS infrastructure deployment (Lambda, DynamoDB, EventBridge, CloudWatch)
+- Event-driven data processing pipeline with 5 scheduled triggers
+- Data ingestion from AlphaVantage and Alpaca APIs
 
-### Phase 2: AI Analysis Engine & User Management (Weeks 5-8)
-**Focus**: Implement AI analysis capabilities and user management systems
+- Comprehensive monitoring and alerting with CloudWatch dashboards
+- Testing and validation framework
+- Cost estimation and capacity planning (25 analysis runs/day)
+
+### Phase 2: Rule-Based Analysis Engine & User Management (Weeks 5-8)
+**Focus**: Implement rule-based analysis capabilities and user management systems
 
 **Key Components**:
-- **AI Analysis Engine**: Financial data processing and rating generation
-- **User Management**: Authentication, profiles, and preferences
-- **Watchlist Management**: Personalized asset tracking
-- **Search and Discovery**: Advanced asset search capabilities
+- **Rule-Based Analysis Engine**: 6 analysis models (Investment Rating, Financial Health, Risk Assessment, Market Analysis, Peer Comparison, Technical Analysis)
+- **User Management**: Auth0 authentication, profiles, and preferences
+- **Watchlist Management**: Multi-watchlist support with personalized asset tracking
+- **Search and Discovery**: Advanced asset search with semantic capabilities
+- **Alert and Notification System**: User-defined alerts for rating changes, news events, risk factors
 
 **Critical Success Factors**:
-- AI analysis accuracy and consistency
-- User experience and interface design
-- System performance under load
-- Data security and privacy compliance
+- Analysis accuracy and consistency (1-5 rating system with confidence intervals)
+- User experience and interface design (React 18+ with TypeScript)
+- System performance under load (sub-500ms API responses)
+- Data security and privacy compliance (GDPR, CCPA)
+- Cost optimization under AlphaVantage rate limits
 
 **Deliverables**:
-- AI analysis engine with 1-5 rating system
-- User authentication and profile management
-- Watchlist and portfolio tracking
-- Advanced search and filtering
-- User interface and experience design
+- Rule-based analysis engine with 6 specialized models and batch processing (8 assets/batch)
+- User authentication via Auth0 with profile management
+- Multi-watchlist system with alert preferences
+- Advanced search with OpenSearch/Elasticsearch integration
+- Alert and notification system with EventBridge integration
+- Frontend foundation with React, TypeScript, and Material-UI
 
 ### Phase 3: Advanced Analytics & Personalization (Weeks 9-12)
 **Focus**: Implement advanced analytics and personalized user experiences
 
 **Key Components**:
-- **Daily Briefing System**: Personalized market insights
-- **Advanced Analytics**: Trend analysis and predictive modeling
-- **Personalization Engine**: User preference learning
-- **Mobile Responsiveness**: Cross-platform compatibility
+- **Daily Briefing System**: 8 core widgets (Executive Summary, Watchlists Overview, Watchlist Analytics, Market Overview, Earnings Calendar, Market News, Personalized Insights)
+- **Asset Profile System**: 9 analysis components (Investment Rating, Financial Health, Risk Assessment, Market Analysis, Peer Comparison, Earnings Analysis, News Feed, Management Analysis, Financial Modeling) with walk-through wizard
+- **Advanced Analytics**: Trend analysis, predictive modeling, and financial projections
+- **Personalization Engine**: User preference learning and adaptive recommendations
+- **Data Visualization**: Interactive charts, heat maps, and fundamental data displays
+- **Mobile Responsiveness**: Cross-platform compatibility with responsive design
 
 **Critical Success Factors**:
-- Personalization accuracy and relevance
-- Analytics insights quality
-- Mobile user experience
-- Performance optimization
+- Personalization accuracy and relevance (rule-based recommendations)
+- Analytics insights quality (comprehensive financial analysis)
+- Mobile user experience (WCAG 2.1 AA compliance)
+- Performance optimization (sub-2-second page loads)
+- Fundamental data updates and interactive features
 
 **Deliverables**:
-- Personalized daily briefings
-- Advanced financial analytics
-- Mobile-responsive interface
-- User preference learning system
-- Performance optimization
+- Daily Briefing dashboard with 8 personalized widgets and drag-and-drop layout
+- Asset Profile pages with 10 detailed analysis components and tabbed interface
+- Advanced financial analytics with DCF, comparable company, and scenario analysis
+- Interactive data visualization with Chart.js/D3.js integration
+- Mobile-responsive interface with touch-friendly interactions
+- User preference learning system with adaptive recommendations
+- Performance optimization with caching and CDN integration
 
 ### Phase 4: Production Deployment & Optimization (Weeks 13-16)
 **Focus**: Production deployment, optimization, and scaling
 
 **Key Components**:
-- **Production Deployment**: Live system launch
-- **Performance Optimization**: Scaling and efficiency improvements
-- **Security Hardening**: Production security measures
-- **Monitoring Enhancement**: Advanced monitoring and alerting
+- **Production Deployment**: Live system launch with CDK deployment
+- **Performance Optimization**: Auto-scaling, caching optimization, and CDN integration
+- **Security Hardening**: Production security measures and compliance audit
+- **Monitoring Enhancement**: Advanced CloudWatch monitoring and alerting
+- **Cost Optimization**: Resource monitoring and AlphaVantage API cost management
 
 **Critical Success Factors**:
-- Production system stability
-- Performance under real-world load
-- Security and compliance
-- User satisfaction and adoption
+- Production system stability (99.5% uptime)
+- Performance under real-world load (1,000+ concurrent users)
+- Security and compliance (GDPR, CCPA, financial data protection)
+- User satisfaction and adoption (>4.5/5 satisfaction score)
+- Cost management under API constraints
 
 **Deliverables**:
-- Production-ready system
-- Performance optimization
-- Security audit and compliance
-- User feedback integration
-- Documentation and training
+- Production-ready system with full CI/CD pipeline
+- Performance optimization with auto-scaling and caching
+- Security audit and compliance certification
+- Advanced monitoring with CloudWatch dashboards and X-Ray tracing
+- User feedback integration and analytics
+- Complete documentation and training materials
+- Cost optimization and capacity planning for scaling
 
 ## Technical Architecture Highlights
 
@@ -102,16 +118,17 @@ The platform is built on a robust, event-driven architecture that efficiently pr
 The system uses a sophisticated event-driven architecture with multiple scheduled triggers and event handlers:
 
 **Scheduled Triggers (Cron Jobs)**:
-- **4:00 AM**: Asset synchronization with Alpaca API
-- **5:00 AM**: Earnings calendar synchronization
+- **4:00 AM**: Asset synchronization with Alpaca API (`/v2/assets?status=active`)
+- **5:00 AM**: Earnings calendar synchronization with AlphaVantage
 - **6:00 AM**: Earnings-triggered pollination (for assets with recent earnings)
 - **7:00 AM**: Regular pollination (for high-volume, stale data assets)
 
+
 **Event-Driven Processing**:
 - **pollenationNeeded Events**: Trigger financial data ingestion for individual assets
-- **analysisNeeded Events**: Trigger AI analysis generation for processed assets
+- **analysisNeeded Events**: Trigger rule-based analysis generation for processed assets (batch processing of 8 assets)
 - **earningsProcessed Events**: Mark earnings as processed to prevent duplicates
-- **analysisComplete Events**: Signal completion of AI analysis workflow
+- **analysisComplete Events**: Signal completion of rule-based analysis workflow
 
 ### Smart Data Management
 - **Event-Driven Updates**: Individual asset processing triggered by specific events
@@ -131,27 +148,32 @@ The system uses a sophisticated event-driven architecture with multiple schedule
 ### Phase 1 Metrics
 - System uptime >99.5%
 - Data processing latency <30 seconds
-- API rate limit compliance 100%
+- API rate limit compliance 100% (AlphaVantage 25 calls/day limit)
 - Data quality validation success >95%
-- Cost per processed asset <$0.01
+- Cost per processed asset <$0.25 (under AlphaVantage constraints)
+- Daily analysis capacity: 25 assets (free tier limit)
 
 ### Overall Project Metrics
 - User satisfaction score >4.5/5
 - System response time <500ms for 95% of requests
+- Frontend page load time <2 seconds
 - Data accuracy >98%
 - Cost per user per month <$5
 - Platform adoption rate >60% within 6 months
+- Analysis success rate >95%
 
 ## Risk Management
 
 ### Technical Risks
-- **API Rate Limiting**: Mitigated through smart caching and rate management
+- **API Rate Limiting**: Mitigated through smart caching, rate management, and AlphaVantage free tier optimization (25 calls/day)
 - **Data Quality**: Addressed through comprehensive validation and monitoring
-- **Scalability**: Designed for horizontal scaling from the start
-- **Cost Management**: Continuous monitoring and optimization
+- **Scalability**: Designed for horizontal scaling from the start with auto-scaling
+- **Cost Management**: Continuous monitoring and optimization under API constraints
+- **Analysis Model Accuracy**: Addressed through mathematical validation, testing, and logical consistency checks
+- **Frontend Performance**: Mitigated through React optimization, caching, and CDN integration
 
 ### Business Risks
-- **Market Competition**: Focus on unique AI-driven insights
+- **Market Competition**: Focus on unique rule-based insights
 - **User Adoption**: Emphasize user experience and value proposition
 - **Regulatory Compliance**: Built-in compliance and security measures
 - **Data Privacy**: Comprehensive privacy protection and GDPR compliance
@@ -159,16 +181,20 @@ The system uses a sophisticated event-driven architecture with multiple schedule
 ## Dependencies
 
 ### External Dependencies
-- AlphaVantage API (financial data)
-- Alpaca API (market data)
-- Auth0 (authentication)
-- AWS services (infrastructure)
+- AlphaVantage API (financial data, 25 calls/day free tier limit)
+- Alpaca API (market data, `/v2/assets?status=active`)
+- Auth0 (authentication and user management)
+- AWS services (Lambda, DynamoDB, EventBridge, CloudWatch, S3, CloudFront)
+- OpenSearch/Elasticsearch (semantic search capabilities)
+- React ecosystem (React 18+, TypeScript, Material-UI)
 
 ### Internal Dependencies
-- Development team with AWS/CDK expertise
-- Financial domain knowledge
-- AI/ML capabilities
-- UI/UX design skills
+- Development team with AWS/CDK expertise (TypeScript, Node.js)
+- Financial domain knowledge (investment analysis, market data)
+- Financial analysis capabilities (6 specialized rule-based models, batch processing)
+- UI/UX design skills (React, TypeScript, responsive design)
+- Data engineering expertise (event-driven architecture, fundamental data processing)
+- DevOps expertise (CI/CD, monitoring, cost optimization)
 
 ## Timeline Summary
 

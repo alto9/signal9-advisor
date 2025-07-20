@@ -10,6 +10,107 @@ Context Engineering is a methodology that leverages AI to systematically plan, o
 2. **Plan** - Detailed phase breakdown with task arrays
 3. **Refine** - Implementation-level ticket creation
 
+## Signal9 Advisor Project: 3-Epic Structure
+
+The Signal9 Advisor project is structured as a learning journey across three major epics, each building upon the previous one:
+
+### 🎯 Epic 1: Foundational Data Analysis (Rule-Based)
+**Focus**: Financial analysis using rule-based algorithms and traditional programming
+**Timeline**: Weeks 1-8
+**Learning Goals**: Financial analysis, data processing, system architecture
+
+**Key Components**:
+- Financial health analysis (debt ratios, profitability metrics, cash flow analysis)
+- Risk assessment models (volatility analysis, sector risk, market correlation)
+- Peer comparison algorithms (industry benchmarking, relative valuation)
+- Technical analysis indicators (moving averages, RSI, MACD, volume analysis)
+- Basic user interface for displaying analysis results
+
+**Technology Stack**:
+- AWS Lambda for data processing
+- DynamoDB for data storage
+- AlphaVantage API for financial data
+- Alpaca API for portfolio data
+- React frontend with Material-UI
+- Rule-based scoring algorithms
+
+**Success Criteria**:
+- Working financial analysis platform
+- Accurate calculation of financial metrics
+- Responsive user interface
+- Reliable data pipeline from APIs
+
+### 🧠 Epic 2: News & Sentiment Analysis (NLP Integration)
+**Focus**: Natural language processing for market sentiment analysis
+**Timeline**: Weeks 9-16
+**Learning Goals**: NLP, AI model integration, sentiment analysis
+
+**Key Components**:
+- News sentiment analysis using pre-trained NLP models
+- Market sentiment aggregation and scoring
+- News relevance filtering and categorization
+- Sentiment-based risk adjustments
+- Enhanced user interface with sentiment insights
+
+**Technology Stack**:
+- Pre-trained NLP models (BERT, RoBERTa, or similar)
+- News API integration
+- Sentiment analysis libraries
+- Enhanced data models for sentiment storage
+- Real-time sentiment processing
+
+**Success Criteria**:
+- Accurate sentiment analysis of financial news
+- Integration with existing financial analysis
+- Improved risk assessment with sentiment factors
+- Enhanced user experience with sentiment insights
+
+### 🔮 Epic 3: Predictive AI (Advanced ML)
+**Focus**: Machine learning for predictive analytics and forecasting
+**Timeline**: Weeks 17-24
+**Learning Goals**: Machine learning, predictive modeling, model training
+
+**Key Components**:
+- Price prediction models using historical data
+- Trend forecasting algorithms
+- Anomaly detection systems
+- Portfolio optimization recommendations
+- Advanced visualization and reporting
+
+**Technology Stack**:
+- Custom ML models (scikit-learn, TensorFlow, or PyTorch)
+- Time series analysis libraries
+- Model training and validation pipelines
+- Advanced data visualization tools
+- Model performance monitoring
+
+**Success Criteria**:
+- Accurate price predictions within acceptable error margins
+- Reliable trend forecasting
+- Actionable investment recommendations
+- Full AI-powered investment analysis platform
+
+### 📊 Epic Progression Benefits
+
+**Learning Progression**:
+- **Epic 1**: Master financial analysis + coding fundamentals
+- **Epic 2**: Learn AI/ML integration and NLP concepts
+- **Epic 3**: Develop advanced ML skills and predictive modeling
+
+**Risk Management**:
+- Each epic delivers a complete, working system
+- User feedback can be incorporated between epics
+- Complexity is contained to manageable chunks
+- Open source transparency maintained throughout
+
+**Value Delivery**:
+- **Epic 1**: Solid financial analysis (immediate value)
+- **Epic 2**: Market sentiment insights (significant value add)
+- **Epic 3**: Predictive capabilities (game-changing value)
+
+**Current Focus**: Epic 1 - Foundational Data Analysis
+All current planning and development focuses on Epic 1 components only. Sentiment analysis and predictive AI features are planned for future epics.
+
 ## Workflow Modes
 
 ### 🧠 Brainstorm Mode

@@ -1,4 +1,4 @@
-# Context Collection
+# Contextual Requirements Document
 
 ## Purpose
 

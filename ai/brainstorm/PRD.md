@@ -2,11 +2,11 @@
 
 ## Product Overview
 
-**Vision**: Signal9 Advisor is a cloud-based investment advisory platform that leverages artificial intelligence to analyze both fundamental and technical market data. By processing vast amounts of financial information, it generates intelligent investment ratings and actionable insights, effectively serving as your opinionated AI-powered financial analyst and investment advisor.
+**Vision**: Signal9 Advisor is an open source cloud-based investment analysis platform that provides comprehensive fundamental data analytics and insights. By processing financial information through rule-based analysis, it generates investment ratings and actionable insights, serving as an educational tool for informed investment decision-making.
 
 **Domain**: signal9.alto9.com
 
-**Value-Add Proposition**: Signal9 transforms novice investors into informed decision-makers by providing institutional-grade investment analysis that was previously inaccessible to retail investors. Our AI-powered platform automatically analyzes thousands of financial data points—from earnings reports to market sentiment—delivering clear, actionable investment ratings and insights personalized to your goals and risk tolerance. While professional analysts spend 40+ hours per week researching individual stocks, Signal9 provides comprehensive analysis in seconds, helping you build a portfolio that can outperform the market with the confidence of professional-grade research behind every decision.
+**Value-Add Proposition**: Signal9 transforms novice investors into informed decision-makers by providing comprehensive fundamental data analysis and educational insights. Our rule-based platform analyzes financial data points—from earnings reports to financial ratios—delivering clear, actionable investment ratings and insights to help users understand the fundamentals behind investment decisions. While professional analysts spend 40+ hours per week researching individual stocks, Signal9 provides comprehensive fundamental analysis in seconds, helping users build knowledge and make informed decisions with confidence.
 
 **Target Users**: 
 - **Primary**: Individual investors (25-45 years old) with $10K-$500K in investable assets who want to build wealth through stock market investing but lack the time or expertise for deep financial analysis
@@ -33,52 +33,44 @@
         - **Daily Earnings Calendar Sync** (5:00 AM): Tracks upcoming earnings releases for proactive data updates
         - **Daily Earnings-Triggered Pollination** (6:00 AM): Triggers data updates for assets with recent earnings releases
         - **Daily Regular Pollination** (7:00 AM): Triggers data updates for high-volume assets with stale data
-        - **Hourly News Sentiment Sync** (Every Hour): Collects fresh news sentiment data for comprehensive market analysis
         - **Event-Driven Processing**: Individual asset processing triggered by specific events (pollenationNeeded, analysisNeeded)
-        - **Smart Prioritization**: Earnings-relevant assets get immediate processing, followed by high-volume assets
         - **State Management**: Proper tracking of processed earnings to prevent duplicate processing
         - **Data Validation**: Comprehensive validation of all incoming financial data before processing
         - **Real-time Monitoring**: CloudWatch dashboard provides visibility into event flow and processing status
 
-**Features Overview - Daily Briefing**: The dashboard that users see after login is referred to as the 'Daily Briefing'. This personalized dashboard provides comprehensive investment insights based on AI analysis of financial data, market sentiment, and risk assessment.
+**Features Overview - Daily Briefing**: The dashboard that users see after login is referred to as the 'Daily Briefing'. This personalized dashboard provides comprehensive investment insights based on rule-based analysis of fundamental financial data and risk assessment.
 
 ### **Daily Briefing Components (Portfolio & Market Level)**
 
-#### **1. Executive Summary Widget**
-- **Market Overview**: Daily market sentiment summary and key market drivers
-- **Portfolio Performance**: Summary of user's watchlist performance with Signal9 ratings
-- **Key Updates**: Assets with rating changes, new analysis results, or significant news
-- **Today's Focus**: Highlighted assets requiring attention based on recent events
-
-#### **2. Watchlists Overview Widget**
+#### **1. Watchlists Overview Widget**
 - **Multi-Watchlist Management**: Create named watchlists (e.g., "Tech Stocks", "Dividend Payers", "Growth Opportunities")
 - **One-Click Actions**: Add/remove assets, view detailed profiles, set alerts
 - **Signal9 Ratings Summary**: Current investment ratings (1-5 scale) with trend indicators
 - **Quick Filters**: Filter by rating, sector, market cap, or recent changes
 - **Performance Tracking**: Daily/weekly/monthly performance metrics for each watchlist
 
-#### **3. Portfolio Analytics Dashboard**
-- **Sector Allocation**: Portfolio breakdown by sector with Signal9 ratings
-- **Risk Distribution**: Portfolio risk profile and diversification analysis
-- **Performance Attribution**: Contribution of each asset to overall performance
-- **Rebalancing Suggestions**: AI-recommended portfolio adjustments based on ratings
-- **Correlation Analysis**: Asset correlation and diversification effectiveness
+#### **2. Watchlist Analytics Dashboard**
+- **Sector Allocation**: Watchlist breakdown by sector with Signal9 ratings
+- **Risk Distribution**: Watchlist risk profile and diversification analysis
+- **Rating Distribution**: Distribution of Signal9 ratings across watchlist assets
+- **Diversification Insights**: Analysis of watchlist concentration and sector exposure
+- **Watchlist Performance**: Track watchlist composition changes and rating trends
 
-#### **4. Market Sentiment Overview**
-- **Overall Market Sentiment**: Aggregate market sentiment across user's watchlist
-- **Sector Sentiment Trends**: Sentiment analysis by sector (Tech, Healthcare, Finance, etc.)
-- **News Highlights**: Most impactful market news affecting user's portfolio
-- **Sentiment Alerts**: Significant market sentiment changes requiring attention
-- **Market Drivers**: Key factors driving overall market sentiment
+#### **3. Market Overview**
+- **Market Performance**: Overall market performance and key market drivers
+- **Sector Performance**: Performance analysis by sector (Tech, Healthcare, Finance, etc.)
+- **Market Highlights**: Most impactful market events affecting user's watchlist
+- **Market Alerts**: Significant market changes requiring attention
+- **Market Drivers**: Key factors driving overall market performance
 
-#### **5. Earnings & Events Calendar**
+#### **4. Earnings & Events Calendar**
 - **Upcoming Earnings**: Earnings release dates for user's watchlist assets
 - **Recent Earnings Summary**: Summary of latest earnings results and market impact
-- **Earnings Surprises**: Significant earnings beats/misses across portfolio
-- **Corporate Events**: Dividends, splits, mergers affecting user's holdings
+- **Earnings Surprises**: Significant earnings beats/misses across watchlist
+- **Corporate Events**: Dividends, splits, mergers affecting watchlist assets
 - **Market Impact**: Overall market impact of earnings season and events
 
-#### **6. Market News & Insights**
+#### **5. Market News & Insights**
 - **Top Market News**: Most important news affecting overall market
 - **Sector News**: Key news by sector relevant to user's news preferences
 - **Economic Indicators**: Key economic data releases and market impact
@@ -115,13 +107,12 @@ Individual asset profile pages provide comprehensive, detailed analysis for spec
 - **Business Risk Factors**: Market position, competitive threats, regulatory risks
 - **Risk Alerts**: Notifications for elevated risk levels or new risk factors
 
-#### **4. Market Sentiment Analysis**
-- **Sentiment Score**: AI-analyzed market sentiment (Bullish/Neutral/Bearish) with confidence levels
-- **News Sentiment**: Recent news articles affecting sentiment with relevance scores and impact analysis
-- **Sentiment Trends**: 30-day sentiment trend analysis with key drivers and changes
-- **Analyst Sentiment**: Wall Street analyst ratings, price targets, and recommendation changes
-- **Social Sentiment**: Social media sentiment and retail investor sentiment indicators
-- **Sentiment Alerts**: Significant sentiment changes requiring attention
+#### **4. Market Analysis**
+- **Market Performance**: Current market performance and trend analysis
+- **News Impact**: Recent news articles affecting the asset with relevance scores and impact analysis
+- **Analyst Coverage**: Wall Street analyst ratings, price targets, and recommendation changes
+- **Market Trends**: 30-day market trend analysis with key drivers and changes
+- **Market Alerts**: Significant market changes requiring attention
 
 #### **5. Peer Comparison Analysis**
 - **Sector Rankings**: Asset performance vs. sector peers (percentile rankings)
@@ -141,11 +132,11 @@ Individual asset profile pages provide comprehensive, detailed analysis for spec
 
 #### **7. News & Research Feed**
 - **Asset-Specific News**: Curated news articles relevant to the specific asset
-- **News Sentiment**: Sentiment analysis for each news article with relevance scoring
+- **News Impact**: Impact analysis for each news article with relevance scoring
 - **Research Reports**: Integration with analyst research and reports
 - **Press Releases**: Company announcements and official communications
 - **News Alerts**: Customizable alerts for significant news events
-- **News Archive**: Historical news with sentiment analysis and impact assessment
+- **News Archive**: Historical news with impact assessment
 
 #### **8. Technical Analysis**
 - **Price Charts**: Interactive price charts with multiple timeframes
@@ -179,6 +170,7 @@ Individual asset profile pages provide comprehensive, detailed analysis for spec
 - **Breadcrumb Navigation**: Easy navigation back to Daily Briefing
 - **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 - **Print/Export**: Generate PDF reports and export data for external analysis
+- **Walk-through Wizard**: First-time user onboarding wizard that guides users through each panel with brief descriptions and user-friendly explanations of how ratings and aggregations were calculated
 
 #### **Interactive Features**
 - **Expandable Sections**: Click to expand detailed analysis components
@@ -196,23 +188,23 @@ Individual asset profile pages provide comprehensive, detailed analysis for spec
 
 ### **Daily Briefing Data Sources**
 
-#### **AI Analysis Results**
+#### **Rule-Based Analysis Results**
 - **Investment Ratings**: 1-5 scale ratings with detailed reasoning
 - **Financial Health Scores**: Comprehensive financial analysis results
 - **Risk Assessment**: Multi-factor risk analysis with specific risk factors
-- **Sentiment Analysis**: Market sentiment scores and news impact analysis
+- **Market Analysis**: Market performance scores and news impact analysis
 - **Peer Comparison**: Sector-relative performance and competitive analysis
 
-#### **Real-Time Data**
-- **Market Data**: Current prices, volume, and trading activity
-- **News Sentiment**: Hourly-updated news sentiment and relevance scores
+#### **Fundamental Data**
+- **Financial Data**: Earnings reports, financial statements, and ratios
+- **News Data**: News articles and relevance scores
 - **Earnings Calendar**: Upcoming and recent earnings events
 - **Corporate Events**: Dividends, splits, and other significant events
 
 #### **Historical Analysis**
 - **Rating History**: Historical Signal9 ratings and trend analysis
-- **Performance Tracking**: Historical performance vs. benchmarks
-- **Sentiment Trends**: 30-day sentiment trend analysis
+- **Watchlist Tracking**: Historical watchlist composition and rating changes
+- **Market Trends**: 30-day market trend analysis
 - **Financial Trends**: 5-year financial performance analysis
 
 ### **Daily Briefing User Experience**
@@ -225,35 +217,34 @@ Individual asset profile pages provide comprehensive, detailed analysis for spec
 - **Mobile Responsive**: Optimized for desktop, tablet, and mobile devices
 
 #### **Intelligent Features**
-- **Smart Notifications**: AI-powered alerts for significant changes
-- **Trend Analysis**: Automatic identification of rating and sentiment trends
-- **Correlation Insights**: AI-identified relationships between assets and events
-- **Predictive Elements**: AI-suggested actions based on analysis patterns
+- **Smart Notifications**: Rule-based alerts for significant changes
+- **Trend Analysis**: Automatic identification of rating and market trends
+- **Correlation Insights**: Rule-based identification of relationships between assets and events
+- **Analysis Insights**: Rule-based suggested actions based on analysis patterns
 - **Learning System**: Adapts to user preferences and investment style
 
 #### **Data Visualization**
-- **Interactive Charts**: Rating trends, performance metrics, and sentiment analysis
+- **Interactive Charts**: Rating trends, watchlist metrics, and market analysis
 - **Heat Maps**: Sector performance and risk distribution visualization
 - **Comparison Tables**: Side-by-side asset comparison with key metrics
 - **Progress Indicators**: Visual representation of rating components and confidence levels
 - **Alert Indicators**: Visual cues for significant changes requiring attention
 
-## **AI Analysis Engine**
+## **Rule-Based Analysis Engine**
 
 ### **Overview**
-The AI analysis engine processes comprehensive financial data and generates detailed investment insights for individual assets. This analysis powers both the Daily Briefing portfolio-level insights and the detailed Asset Profile pages.
+The rule-based analysis engine processes comprehensive financial data and generates detailed investment insights for individual assets using sophisticated financial analysis algorithms. This analysis powers both the Daily Briefing portfolio-level insights and the detailed Asset Profile pages.
 
-### **AI Data Processing Pipeline**
+### **Data Processing Pipeline**
 - **Financial Data Sources**: Alpha Vantage APIs providing comprehensive financial data
   - Company Overview (market cap, P/E ratios, dividend data, analyst ratings)
   - Income Statements (revenue, profit margins, growth trends, R&D spending)
   - Balance Sheets (assets, liabilities, debt levels, cash positions)
   - Cash Flow Statements (operating cash flow, capital expenditures, dividend payments)
   - Earnings Data (EPS trends, earnings surprises, quarterly performance)
-- **News Sentiment Data**: Collected separately via the Hourly News Sentiment Sync process
 - **Market Data**: Real-time pricing, volume, and trading activity from Alpaca APIs
 
-### **AI Analysis Components**
+### **Analysis Components**
 
 #### **1. Investment Rating Generation**
 - **Composite Rating**: 1-5 scale rating combining multiple analysis components
@@ -261,10 +252,10 @@ The AI analysis engine processes comprehensive financial data and generates deta
   - Financial health score (30% weight)
   - Growth potential score (25% weight)
   - Risk assessment score (20% weight)
-  - Market sentiment score (15% weight)
+  - Market analysis score (15% weight)
   - Peer comparison score (10% weight)
 - **Confidence Metrics**: Rating confidence intervals and stability indicators
-- **Rating Reasoning**: AI-generated explanation of rating factors and key influences
+- **Rating Reasoning**: Rule-based explanation of rating factors and key influences
 
 #### **2. Financial Health Analysis**
 - **Key Metrics**: P/E, P/B, EV/EBITDA, ROE, ROA, profit margins, debt ratios
@@ -274,18 +265,17 @@ The AI analysis engine processes comprehensive financial data and generates deta
 - **Financial Trends**: 5-year historical analysis of key financial metrics and stability
 
 #### **3. Risk Assessment Engine**
-- **Risk Scoring**: AI-generated 1-5 scale risk assessment with detailed breakdown
+- **Risk Scoring**: Rule-based 1-5 scale risk assessment with detailed breakdown
 - **Financial Risk Metrics**: Debt-to-equity, interest coverage, cash flow stability
 - **Business Risk Factors**: Market position, competitive threats, regulatory risks
 - **Volatility Analysis**: Price volatility, earnings volatility, and stability metrics
 - **Risk Factor Identification**: Specific risk factors with impact assessment
 
-#### **4. Market Sentiment Analysis**
-- **Sentiment Scoring**: AI-analyzed market sentiment (Bullish/Neutral/Bearish) with confidence levels
-- **News Sentiment**: Recent news articles affecting sentiment with relevance scores and impact analysis
-- **Sentiment Trends**: 30-day sentiment trend analysis with key drivers and changes
-- **Analyst Sentiment**: Wall Street analyst ratings, price targets, and recommendation changes
-- **Social Sentiment**: Social media sentiment and retail investor sentiment indicators
+#### **4. Market Analysis**
+- **Market Performance**: Current market performance and trend analysis
+- **News Impact**: Recent news articles affecting the asset with relevance scores and impact analysis
+- **Market Trends**: 30-day market trend analysis with key drivers and changes
+- **Analyst Coverage**: Wall Street analyst ratings, price targets, and recommendation changes
 
 #### **5. Peer Comparison Analysis**
 - **Sector Rankings**: Asset performance vs. sector peers (percentile rankings)
@@ -294,14 +284,8 @@ The AI analysis engine processes comprehensive financial data and generates deta
 - **Competitive Analysis**: Relative strengths and weaknesses within sector
 - **Market Position**: Competitive moat, market share, and industry positioning
 
-#### **6. Advanced Financial Modeling**
-- **Revenue Projections**: AI-generated revenue forecasts with scenario analysis
-- **Earnings Projections**: EPS forecasts with sensitivity analysis
-- **Valuation Models**: DCF, comparable company, and sum-of-parts valuations
-- **Scenario Analysis**: Bull, base, and bear case scenarios
-- **Fair Value Estimates**: AI-calculated fair value with confidence intervals
 
-### **AI Analysis Output Examples**
+### **Analysis Output Examples**
 
 #### **Investment Rating Example**
 ```
