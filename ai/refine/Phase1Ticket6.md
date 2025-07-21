@@ -102,13 +102,94 @@ Implement comprehensive data quality and validation framework for Signal9 Adviso
            }
          }
          
-         const isValid = missingFields.length === 0 && invalidFields.length === 0;
-         
          return {
-           isValid,
-           errors: [...missingFields.map(f => `Missing field: ${f}`), ...invalidFields.map(f => `Invalid field: ${f}`)],
-           dataType,
-           timestamp: new Date().toISOString()
+           isValid: missingFields.length === 0 && invalidFields.length === 0,
+           missingFields,
+           invalidFields
+         };
+       }
+
+       private validateBatchProcessing(batch: any[]): ValidationResult {
+         // Validate batch size
+         if (batch.length !== 8) {
+           return {
+             isValid: false,
+             error: `Invalid batch size: ${batch.length}. Expected exactly 8 assets per batch.`
+           };
+         }
+
+         // Validate batch contents
+         const uniqueAssets = new Set(batch.map(item => item.assetId));
+         if (uniqueAssets.size !== batch.length) {
+           return {
+             isValid: false,
+             error: 'Duplicate assets found in batch. Each asset must be unique.'
+           };
+         }
+
+         // Validate batch data completeness
+         for (const item of batch) {
+           if (!item.assetId || !item.dataTypes || !Array.isArray(item.dataTypes)) {
+             return {
+               isValid: false,
+               error: `Invalid batch item structure for asset ${item.assetId}`
+             };
+           }
+         }
+
+         return { isValid: true };
+       }
+
+       private validateFinancialMetrics(data: any): ValidationResult {
+         const numericFields = [
+           'MarketCapitalization',
+           'EBITDA',
+           'PERatio',
+           'PEGRatio',
+           'BookValue',
+           'DividendPerShare',
+           'DividendYield',
+           'EPS',
+           'RevenuePerShareTTM',
+           'ProfitMargin',
+           'OperatingMarginTTM',
+           'ReturnOnAssetsTTM',
+           'ReturnOnEquityTTM',
+           'RevenueTTM',
+           'GrossProfitTTM',
+           'DilutedEPSTTM'
+         ];
+
+         const invalidFields = [];
+         for (const field of numericFields) {
+           if (field in data) {
+             const value = parseFloat(data[field]);
+             if (isNaN(value)) {
+               invalidFields.push(`${field} is not a valid number`);
+             } else {
+               // Validate specific metrics
+               switch (field) {
+                 case 'MarketCapitalization':
+                   if (value <= 0) invalidFields.push('Market cap must be positive');
+                   break;
+                 case 'PERatio':
+                   if (value < 0) invalidFields.push('P/E ratio cannot be negative');
+                   break;
+                 case 'DividendYield':
+                   if (value < 0 || value > 1) invalidFields.push('Dividend yield must be between 0 and 1');
+                   break;
+                 case 'ProfitMargin':
+                 case 'OperatingMarginTTM':
+                   if (value < -1 || value > 1) invalidFields.push(`${field} must be between -1 and 1`);
+                   break;
+               }
+             }
+           }
+         }
+
+         return {
+           isValid: invalidFields.length === 0,
+           invalidFields
          };
        }
        

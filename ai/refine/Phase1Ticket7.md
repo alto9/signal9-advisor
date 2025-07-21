@@ -92,6 +92,28 @@ Implement comprehensive monitoring and observability framework for Signal9 Advis
              Value: success ? 1 : 0,
              Unit: 'Count',
              Timestamp: timestamp
+           },
+           {
+             MetricName: 'AlphaVantageCallsToday',
+             Dimensions: [{ Name: 'APIName', Value: 'AlphaVantage' }],
+             Value: apiName === 'AlphaVantage' ? 1 : 0,
+             Unit: 'Count',
+             StorageResolution: 60,
+             Timestamp: timestamp
+           },
+           {
+             MetricName: 'BatchProcessingSize',
+             Dimensions: [{ Name: 'Operation', Value: 'AssetAnalysis' }],
+             Value: 8,  // Fixed batch size of 8 assets
+             Unit: 'Count',
+             Timestamp: timestamp
+           },
+           {
+             MetricName: 'BatchProcessingEfficiency',
+             Dimensions: [{ Name: 'Operation', Value: 'AssetAnalysis' }],
+             Value: responseTime / 8,  // Time per asset in batch
+             Unit: 'Milliseconds',
+             Timestamp: timestamp
            }
          ];
          
