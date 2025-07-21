@@ -16,7 +16,7 @@ The platform is built on a robust, event-driven architecture that efficiently pr
 - **Smart Data Pollination**: Dual paths for regular and earnings-triggered updates
 - **API Rate Management**: Efficient handling of AlphaVantage (25 calls/day) and Alpaca APIs
 - **Data Quality Assurance**: Comprehensive validation and monitoring
-
+- **Secrets Management**: AWS Secrets Manager for secure API key storage
 
 **Critical Success Factors**:
 - Robust event-driven data processing pipeline
@@ -24,12 +24,12 @@ The platform is built on a robust, event-driven architecture that efficiently pr
 - Data quality validation achieving >95% success rate
 - Comprehensive monitoring and observability
 - Cost optimization under API constraints
+- Secure credential management
 
 **Deliverables**:
-- Complete AWS infrastructure deployment (Lambda, DynamoDB, EventBridge, CloudWatch)
+- Complete AWS infrastructure deployment (Lambda, DynamoDB, EventBridge, CloudWatch, Secrets Manager)
 - Event-driven data processing pipeline with 5 scheduled triggers
 - Data ingestion from AlphaVantage and Alpaca APIs
-
 - Comprehensive monitoring and alerting with CloudWatch dashboards
 - Testing and validation framework
 - Cost estimation and capacity planning (25 analysis runs/day)
@@ -122,7 +122,7 @@ The system uses a sophisticated event-driven architecture with multiple schedule
 - **5:00 AM**: Earnings calendar synchronization with AlphaVantage
 - **6:00 AM**: Earnings-triggered pollination (for assets with recent earnings)
 - **7:00 AM**: Regular pollination (for high-volume, stale data assets)
-
+- **Hourly**: News sentiment synchronization with AlphaVantage
 
 **Event-Driven Processing**:
 - **pollenationNeeded Events**: Trigger financial data ingestion for individual assets
@@ -136,12 +136,14 @@ The system uses a sophisticated event-driven architecture with multiple schedule
 - **State Management**: Proper tracking of processed earnings to prevent duplicates
 - **Rate Limit Optimization**: Efficient API usage with event-driven processing
 - **Data Quality Validation**: Comprehensive validation at every processing stage
+- **News Sentiment Integration**: Hourly news collection with asset-specific sentiment analysis
 
 ### Scalability Design
 - **Event-Driven Processing**: Individual asset processing for optimal resource utilization
 - **Auto-scaling**: DynamoDB and Lambda auto-scaling based on event volume
 - **Event Management**: Event routing and handling with retry logic
 - **Cost Optimization**: Resource monitoring and event-driven scaling
+- **Step Functions Integration**: Robust workflow orchestration for complex analysis pipelines
 
 ## Success Metrics
 
@@ -171,6 +173,7 @@ The system uses a sophisticated event-driven architecture with multiple schedule
 - **Cost Management**: Continuous monitoring and optimization under API constraints
 - **Analysis Model Accuracy**: Addressed through mathematical validation, testing, and logical consistency checks
 - **Frontend Performance**: Mitigated through React optimization, caching, and CDN integration
+- **Secrets Management**: Secure credential storage and rotation via AWS Secrets Manager
 
 ### Business Risks
 - **Market Competition**: Focus on unique rule-based insights
@@ -184,7 +187,7 @@ The system uses a sophisticated event-driven architecture with multiple schedule
 - AlphaVantage API (financial data, 25 calls/day free tier limit)
 - Alpaca API (market data, `/v2/assets?status=active`)
 - Auth0 (authentication and user management)
-- AWS services (Lambda, DynamoDB, EventBridge, CloudWatch, S3, CloudFront)
+- AWS services (Lambda, DynamoDB, EventBridge, CloudWatch, S3, CloudFront, Secrets Manager, Step Functions)
 - OpenSearch/Elasticsearch (semantic search capabilities)
 - React ecosystem (React 18+, TypeScript, Material-UI)
 
@@ -200,7 +203,7 @@ The system uses a sophisticated event-driven architecture with multiple schedule
 
 | Phase | Duration | Focus | Key Deliverables |
 |-------|----------|-------|------------------|
-| 1 | Weeks 1-4 | Infrastructure & Data Pipeline | Event-driven architecture, data ingestion, monitoring |
+| 1 | Weeks 1-4 | Infrastructure & Data Pipeline | Event-driven architecture, data ingestion, monitoring, secrets management |
 | 2 | Weeks 5-8 | Rule-Based Engine & User Management | Rule-based analysis, user system, watchlists |
 | 3 | Weeks 9-12 | Analytics & Personalization | Daily briefings, advanced analytics, mobile |
 | 4 | Weeks 13-16 | Production & Optimization | Live deployment, optimization, scaling |

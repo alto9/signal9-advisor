@@ -253,6 +253,14 @@
   - CCPA compliance for California users
   - Financial data protection standards
 
+**Secrets Management**:
+- **AWS Secrets Manager**: Single secret to store external API credentials
+  - Alpaca API key and secret
+  - AlphaVantage API key
+- **Access Control**: Lambda functions access secrets via IAM roles
+- **Rotation**: Automated secret rotation every 90 days
+- **Audit**: CloudTrail logging for secret access and modifications
+
 ### Testing Strategy
 
 **Unit Testing**:

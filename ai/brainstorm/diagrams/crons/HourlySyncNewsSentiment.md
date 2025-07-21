@@ -4,87 +4,118 @@ This diagram shows the hourly scheduled job that synchronizes news sentiment dat
 
 ```mermaid
 flowchart TD
-    A[EventBridge Rule: Hourly] --> B[Lambda: SyncNewsSentiment]
-    B --> C[Calculate date range: last 2 hours]
-    C --> D[Call AlphaVantage NEWS_SENTIMENT API with date range]
-    D --> E[AlphaVantage API: NEWS_SENTIMENT]
-    E --> F[Validate news sentiment data]
-    F --> G[Extract ticker symbols from API response]
-    G --> H[Batch query DynamoDB: Check which tickers are active assets]
-    H --> I[DynamoDB: signal9_assets table]
-    I --> J[Filter news to only active assets]
-    J --> K[DynamoDB: newsSentiment table]
-    K --> L[Store filtered news with asset associations]
-    L --> M[Update lastNewsSyncTimestamp]
-    M --> N[Emit CloudWatch metrics]
+    %% AWS EventBridge triggers the Lambda function
+    A[EventBridge Rule<br/>Cron: 0 * * * ? *] --> B[Lambda Function<br/>SyncNewsSentiment]
     
-    %% AWS Resources
+    %% Lambda function internal processing steps
+    B --> C[Lambda: Calculate date range<br/>last 2 hours]
+    C --> D[Lambda: HTTP GET request<br/>AlphaVantage NEWS_SENTIMENT API]
+    D --> E[External: AlphaVantage API<br/>NEWS_SENTIMENT endpoint]
+    E --> F[Lambda: Validate API response<br/>Check required fields & sentiment scores]
+    F --> G[Lambda: Extract ticker symbols<br/>From ticker_sentiment arrays]
+    G --> H[Lambda: BatchGetItem request<br/>DynamoDB signal9_assets table]
+    H --> I[DynamoDB: signal9_assets table<br/>Query active asset symbols]
+    I --> J[Lambda: Filter news articles<br/>Match against active assets]
+    J --> K[Lambda: BatchWriteItem request<br/>DynamoDB newsSentiment table]
+    K --> L[DynamoDB: newsSentiment table<br/>Store filtered news with asset associations]
+    L --> M[Lambda: Update sync timestamp<br/>In DynamoDB metadata table]
+    M --> N[Lambda: PutMetricData request<br/>CloudWatch Metrics]
+    
+    %% AWS Resource groupings
     subgraph "AWS Infrastructure"
-        O[EventBridge Rule]
-        P[Lambda Function]
-        Q[DynamoDB Tables]
-        R[CloudWatch Metrics]
+        subgraph "EventBridge"
+            O[EventBridge Rule<br/>Scheduled Trigger]
+        end
+        
+        subgraph "Lambda"
+            P[Lambda Function<br/>SyncNewsSentiment<br/>Runtime: Node.js/Python]
+        end
+        
+        subgraph "DynamoDB"
+            Q[signal9_assets table<br/>Read: Active asset symbols]
+            R[newsSentiment table<br/>Write: News sentiment data]
+            S[metadata table<br/>Write: Sync timestamps]
+        end
+        
+        subgraph "CloudWatch"
+            T[Metrics & Logs<br/>Monitoring & Alerting]
+        end
     end
     
     %% External API
     subgraph "External API"
-        S[AlphaVantage Trading API]
+        U[AlphaVantage Trading API<br/>NEWS_SENTIMENT endpoint]
     end
     
-    %% Connections
+    %% Resource connections for clarity
     A -.-> O
     B -.-> P
     I -.-> Q
-    K -.-> Q
-    N -.-> R
-    E -.-> S
+    L -.-> R
+    M -.-> S
+    N -.-> T
+    E -.-> U
     
+    %% Color coding by resource type
     style A fill:#2196F3,stroke:#1976D2,stroke-width:2px,color:#ffffff
     style B fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#ffffff
-    style C fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#ffffff
+    style C fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#ffffff
     style D fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#ffffff
     style E fill:#F44336,stroke:#D32F2F,stroke-width:2px,color:#ffffff
-    style F fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#ffffff
-    style G fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#ffffff
-    style H fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#ffffff
+    style F fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#ffffff
+    style G fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#ffffff
+    style H fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#ffffff
     style I fill:#9C27B0,stroke:#7B1FA2,stroke-width:2px,color:#ffffff
     style J fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#ffffff
-    style K fill:#9C27B0,stroke:#7B1FA2,stroke-width:2px,color:#ffffff
-    style L fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#ffffff
-    style M fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#ffffff
-    style N fill:#607D8B,stroke:#455A64,stroke-width:2px,color:#ffffff
+    style K fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#ffffff
+    style L fill:#9C27B0,stroke:#7B1FA2,stroke-width:2px,color:#ffffff
+    style M fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#ffffff
+    style N fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#ffffff
     style O fill:#607D8B,stroke:#455A64,stroke-width:2px,color:#ffffff
     style P fill:#607D8B,stroke:#455A64,stroke-width:2px,color:#ffffff
     style Q fill:#607D8B,stroke:#455A64,stroke-width:2px,color:#ffffff
     style R fill:#607D8B,stroke:#455A64,stroke-width:2px,color:#ffffff
-    style S fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#ffffff
+    style S fill:#607D8B,stroke:#455A64,stroke-width:2px,color:#ffffff
+    style T fill:#607D8B,stroke:#455A64,stroke-width:2px,color:#ffffff
+    style U fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#ffffff
 ```
 
 ## Process Flow
 
-1. **EventBridge Rule: Hourly** - AWS EventBridge triggers the job every hour using cron expression `0 * * * ? *`
-2. **Lambda: SyncNewsSentiment** - AWS Lambda function (Node.js/Python) is invoked to handle news sentiment synchronization
-3. **Calculate date range: last 2 hours** - Determine the time window for news collection (e.g., last 2 hours)
-4. **Call AlphaVantage NEWS_SENTIMENT API with date range** - Single API call to get all news within the time window
-5. **AlphaVantage API: NEWS_SENTIMENT** - The Lambda function makes a single HTTPS call to AlphaVantage's NEWS_SENTIMENT endpoint
-6. **Validate news sentiment data** - Validate incoming data for required fields, sentiment scores, and relevance
-7. **Extract ticker symbols from API response** - Extract unique ticker symbols from the `ticker_sentiment` arrays in the API response
-8. **Batch query DynamoDB: Check which tickers are active assets** - Efficiently check which extracted tickers exist in our active assets table
-9. **DynamoDB: signal9_assets table** - Source of active asset symbols for validation
-10. **Filter news to only active assets** - Filter news articles to only those mentioning our tracked assets
-11. **DynamoDB: newsSentiment table** - AWS DynamoDB table that stores filtered news sentiment information
-12. **Store filtered news with asset associations** - Store only relevant news items, linking them to active assets
-13. **Update lastNewsSyncTimestamp** - Updates the sync timestamp to track when news was last collected
-14. **Emit CloudWatch metrics** - Sends success/failure metrics and processing statistics to CloudWatch
+### AWS Resource Responsibilities
+
+1. **EventBridge Rule** - AWS EventBridge triggers the job every hour using cron expression `0 * * * ? *`
+2. **Lambda Function** - AWS Lambda function (Node.js/Python) performs all processing logic:
+   - **Calculate date range** - Determines the time window for news collection (e.g., last 2 hours)
+   - **HTTP GET request** - Makes HTTPS call to AlphaVantage's NEWS_SENTIMENT endpoint
+   - **Validate API response** - Validates incoming data for required fields, sentiment scores, and relevance
+   - **Extract ticker symbols** - Extracts unique ticker symbols from the `ticker_sentiment` arrays
+   - **BatchGetItem request** - Queries DynamoDB to check which extracted tickers exist in active assets
+   - **Filter news articles** - Filters news to only those mentioning tracked assets
+   - **BatchWriteItem request** - Writes filtered news to DynamoDB with asset associations
+   - **Update sync timestamp** - Updates the sync timestamp in metadata table
+   - **PutMetricData request** - Sends metrics to CloudWatch
+
+3. **DynamoDB Tables**:
+   - **signal9_assets table** - Source of active asset symbols (read operation)
+   - **newsSentiment table** - Stores filtered news sentiment information (write operation)
+   - **metadata table** - Tracks sync timestamps and job state (write operation)
+
+4. **CloudWatch** - Receives metrics and logs for monitoring and alerting
+
+5. **AlphaVantage API** - External service providing news sentiment data via HTTP endpoint
 
 ## Technical Implementation
 
 ### AWS Resources Required
 - **EventBridge Rule**: Scheduled trigger with cron expression `0 * * * ? *` (every hour)
 - **Lambda Function**: Serverless compute for API calls and database operations
-- **DynamoDB Tables**: signal9_assets (read) and newsSentiment (write)
-- **IAM Roles**: Permissions for Lambda to access DynamoDB and make external API calls
-- **CloudWatch**: Monitoring and metrics collection
+- **DynamoDB Tables**: 
+  - signal9_assets (read access)
+  - newsSentiment (write access) 
+  - metadata (write access for sync timestamps)
+- **IAM Roles**: Permissions for Lambda to access DynamoDB, CloudWatch, and make external API calls
+- **CloudWatch**: Monitoring, metrics collection, and logging
 
 ### Rate Limiting Strategy
 - **AlphaVantage Free Tier**: 5 API calls per minute, 500 per day
