@@ -7,6 +7,9 @@ A planned but unrefined task within a phase. Tasks include context hints from co
 
 ### Task [Phase].[Number]: [Title]
 
+### Estimate
+[Time Estimate]
+
 **Status**: [Not Started/In Progress/Completed]
 
 #### Description

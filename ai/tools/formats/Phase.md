@@ -7,6 +7,8 @@ A phase template for detailed planning of implementation phases. Each phase cont
 
 # Phase [Phase Number]: [Phase Name]
 
+## Phase Estimate [Aggregate Time Estimate]
+
 ## Phase Details
 - **Name**: [Phase Name]
 - **Duration**: [Estimated time in weeks/months]

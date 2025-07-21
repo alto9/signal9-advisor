@@ -11,6 +11,7 @@ This file serves as a central repository for all relevant context that will be n
 
 ### Docs
 - **AlphaVantage**: Doc: `@AlphaVantage API` - used to inform tasks related to interfacing directly with the Alpha Vantage API. Alpha Vantage is the source used to retrieve all fundamental asset data.
+- **Alpaca Typescript SDK**: Doc: `@Alpaca Typescript SDK` - used to inform tasks related to interfacing directly with the Alpaca API with Typescript. Alpaca is the source used to retrieve assets, and all technical asset data.
 
 ### Models
 - **Company Overview**: [AlphaVantage OVERVIEW Model](./models/alphavantage/OVERVIEW.json) - used to describe the format of data received from AlphaVantage for the Company Overviews

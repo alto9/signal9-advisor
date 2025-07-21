@@ -7,6 +7,9 @@ A refined task becomes a ticket with complete implementation steps, detailed tec
 
 ### Ticket [Phase].[Number]: [Title]
 
+### Estimate
+[Time Estimate]
+
 **Status**: [Refinement Complete|Refinement|Ready for Development|In Development|Testing|Complete]
 
 #### Description
