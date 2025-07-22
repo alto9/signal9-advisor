@@ -1,0 +1,21 @@
+{
+  "version": "44.0.0",
+  "files": {
+    "a278d190f10e388d7d442d107925b2454e012e21790bd18f4964764aa1dd43ad": {
+      "displayName": "Signal9AdvisorStack Template",
+      "source": {
+        "path": "Signal9AdvisorStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "152319255064-us-east-1": {
+          "bucketName": "cdk-hnb659fds-assets-152319255064-us-east-1",
+          "objectKey": "a278d190f10e388d7d442d107925b2454e012e21790bd18f4964764aa1dd43ad.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::152319255064:role/cdk-hnb659fds-file-publishing-role-152319255064-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
