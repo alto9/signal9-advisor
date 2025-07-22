@@ -1,0 +1,389 @@
+{
+  "version": "44.0.0",
+  "artifacts": {
+    "Signal9AdvisorStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "Signal9AdvisorStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "Signal9AdvisorStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://152319255064/us-east-1",
+      "properties": {
+        "templateFile": "Signal9AdvisorStack.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Environment": "development",
+          "ManagedBy": "CDK",
+          "Phase": "Phase1",
+          "Project": "Signal9Advisor"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::152319255064:role/cdk-hnb659fds-deploy-role-152319255064-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::152319255064:role/cdk-hnb659fds-cfn-exec-role-152319255064-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-152319255064-us-east-1/a278d190f10e388d7d442d107925b2454e012e21790bd18f4964764aa1dd43ad.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "Signal9AdvisorStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::152319255064:role/cdk-hnb659fds-lookup-role-152319255064-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "Signal9AdvisorStack.assets"
+      ],
+      "metadata": {
+        "/Signal9AdvisorStack": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Environment",
+                "Value": "development"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Phase",
+                "Value": "Phase1"
+              },
+              {
+                "Key": "Project",
+                "Value": "Signal9Advisor"
+              }
+            ]
+          }
+        ],
+        "/Signal9AdvisorStack/Database/AssetsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "DatabaseAssetsTableA76744CA"
+            }
+          }
+        ],
+        "/Signal9AdvisorStack/Database/AssetsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseAssetsTableA76744CA"
+          }
+        ],
+        "/Signal9AdvisorStack/Database/EarningsCalendarTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "DatabaseEarningsCalendarTableB92AB8D3"
+            }
+          }
+        ],
+        "/Signal9AdvisorStack/Database/EarningsCalendarTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseEarningsCalendarTableB92AB8D3"
+          }
+        ],
+        "/Signal9AdvisorStack/Database/AnalysisQueueTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "DatabaseAnalysisQueueTable3DCDA5DE"
+            }
+          }
+        ],
+        "/Signal9AdvisorStack/Database/AnalysisQueueTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DatabaseAnalysisQueueTable3DCDA5DE"
+          }
+        ],
+        "/Signal9AdvisorStack/S3/AnalysisDataBucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "S3AnalysisDataBucketA2A4D8B3"
+          }
+        ],
+        "/Signal9AdvisorStack/S3/AnalysisDataBucket/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "S3AnalysisDataBucketPolicy1456B675"
+          }
+        ],
+        "/Signal9AdvisorStack/Secrets/SecretRotationFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsSecretRotationFunctionServiceRole4C20F509"
+          }
+        ],
+        "/Signal9AdvisorStack/Secrets/SecretRotationFunction/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsSecretRotationFunctionServiceRoleDefaultPolicy650A8F96"
+          }
+        ],
+        "/Signal9AdvisorStack/Secrets/SecretRotationFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsSecretRotationFunction1951C011"
+          }
+        ],
+        "/Signal9AdvisorStack/Secrets/SecretRotationFunction/InvokeN0--a2GKfZP0JmDqDE--Vhhu6+A0TUv3NyNbk4YM+FKNc=": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsSecretRotationFunctionInvokeN0a2GKfZP0JmDqDEVhhu6A0TUv3NyNbk4YMFKNcDA5FCE03"
+          }
+        ],
+        "/Signal9AdvisorStack/Secrets/ApiCredentialsSecret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsApiCredentialsSecret1D803A0F"
+          }
+        ],
+        "/Signal9AdvisorStack/Secrets/ApiCredentialsSecret/RotationSchedule/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsApiCredentialsSecretRotationSchedule4D342D07"
+          }
+        ],
+        "/Signal9AdvisorStack/Secrets/ApiCredentialsSecret/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsApiCredentialsSecretPolicyE26DA9FC"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsAccess/SecretsReaderPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsAccessSecretsReaderPolicy39A7D742"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsAccess/SecretsReaderRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsAccessSecretsReaderRoleF7B76B17"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/SecretsTrailBucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringSecretsTrailBucketC8106A05"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/SecretsTrailBucket/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringSecretsTrailBucketPolicy1CC16E38"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/SecretsTrailLogGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringSecretsTrailLogGroup7DAC2E15"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/SecretsTrailLogGroup/UnauthorizedAccessMetricFilter/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringSecretsTrailLogGroupUnauthorizedAccessMetricFilterBA22187C"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/SecretsTrailLogGroup/HighVolumeAccessMetricFilter/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringSecretsTrailLogGroupHighVolumeAccessMetricFilter4B5C29DF"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/SecretsTrailLogGroup/SecretRotationMetricFilter/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringSecretsTrailLogGroupSecretRotationMetricFilter9CC1EABA"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/SecretsTrailLogGroup/SecretUpdateMetricFilter/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringSecretsTrailLogGroupSecretUpdateMetricFilterAD9B5AF7"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/SecretsTrailLogGroup/AccessByRegionMetricFilter/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringSecretsTrailLogGroupAccessByRegionMetricFilter3CD8BE1A"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/SecretsManagerTrail/LogsRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringSecretsManagerTrailLogsRoleA790478A"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/SecretsManagerTrail/LogsRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringSecretsManagerTrailLogsRoleDefaultPolicy57C43DFB"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/SecretsManagerTrail/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringSecretsManagerTrailCB8E5756"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/UnauthorizedSecretAccessAlarm/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringUnauthorizedSecretAccessAlarmC35A092D"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/HighVolumeSecretAccessAlarm/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringHighVolumeSecretAccessAlarm7D2AE461"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoring/SecretsMonitoringDashboard/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringSecretsMonitoringDashboard5E2DCABA"
+          }
+        ],
+        "/Signal9AdvisorStack/LambdaRoles/DataProcessingRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LambdaRolesDataProcessingRole31794ABF"
+          }
+        ],
+        "/Signal9AdvisorStack/LambdaRoles/DataProcessingRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LambdaRolesDataProcessingRoleDefaultPolicy0D4A867D"
+          }
+        ],
+        "/Signal9AdvisorStack/AssetsTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AssetsTableName"
+          }
+        ],
+        "/Signal9AdvisorStack/EarningsCalendarTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "EarningsCalendarTableName"
+          }
+        ],
+        "/Signal9AdvisorStack/AnalysisQueueTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AnalysisQueueTableName"
+          }
+        ],
+        "/Signal9AdvisorStack/AnalysisDataBucketName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AnalysisDataBucketName"
+          }
+        ],
+        "/Signal9AdvisorStack/DataProcessingRoleArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DataProcessingRoleArn"
+          }
+        ],
+        "/Signal9AdvisorStack/ApiCredentialsSecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiCredentialsSecretArn"
+          }
+        ],
+        "/Signal9AdvisorStack/ApiCredentialsSecretName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiCredentialsSecretName"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsReaderRoleArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsReaderRoleArn"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsReaderPolicyArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsReaderPolicyArn"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretRotationLambdaArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretRotationLambdaArn"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsCloudTrailArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsCloudTrailArn"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsMonitoringDashboardUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsMonitoringDashboardUrl"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretsTrailBucketName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretsTrailBucketName"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretPopulationCommand": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretPopulationCommand"
+          }
+        ],
+        "/Signal9AdvisorStack/SecretTestCommand": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretTestCommand"
+          }
+        ],
+        "/Signal9AdvisorStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/Signal9AdvisorStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/Signal9AdvisorStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "Signal9AdvisorStack"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  },
+  "minimumCliVersion": "2.1020.0"
+}
