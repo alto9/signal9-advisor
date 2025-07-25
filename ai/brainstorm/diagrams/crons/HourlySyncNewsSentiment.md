@@ -13,8 +13,8 @@ flowchart TD
     D --> E[External: AlphaVantage API<br/>NEWS_SENTIMENT endpoint]
     E --> F[Lambda: Validate API response<br/>Check required fields & sentiment scores]
     F --> G[Lambda: Extract ticker symbols<br/>From ticker_sentiment arrays]
-    G --> H[Lambda: BatchGetItem request<br/>DynamoDB signal9_assets table]
-    H --> I[DynamoDB: signal9_assets table<br/>Query active asset symbols]
+    G --> H[Lambda: BatchGetItem request<br/>DynamoDB assets table]
+    H --> I[DynamoDB: assets table<br/>Query active asset symbols]
     I --> J[Lambda: Filter news articles<br/>Match against active assets]
     J --> K[Lambda: BatchWriteItem request<br/>DynamoDB newsSentiment table]
     K --> L[DynamoDB: newsSentiment table<br/>Store filtered news with asset associations]
@@ -32,7 +32,7 @@ flowchart TD
         end
         
         subgraph "DynamoDB"
-            Q[signal9_assets table<br/>Read: Active asset symbols]
+            Q[assets table<br/>Read: Active asset symbols]
             R[newsSentiment table<br/>Write: News sentiment data]
             S[metadata table<br/>Write: Sync timestamps]
         end
@@ -97,7 +97,7 @@ flowchart TD
    - **PutMetricData request** - Sends metrics to CloudWatch
 
 3. **DynamoDB Tables**:
-   - **signal9_assets table** - Source of active asset symbols (read operation)
+   - **assets table** - Source of active asset symbols (read operation)
    - **newsSentiment table** - Stores filtered news sentiment information (write operation)
    - **metadata table** - Tracks sync timestamps and job state (write operation)
 
@@ -111,7 +111,7 @@ flowchart TD
 - **EventBridge Rule**: Scheduled trigger with cron expression `0 * * * ? *` (every hour)
 - **Lambda Function**: Serverless compute for API calls and database operations
 - **DynamoDB Tables**: 
-  - signal9_assets (read access)
+  - assets (read access)
   - newsSentiment (write access) 
   - metadata (write access for sync timestamps)
 - **IAM Roles**: Permissions for Lambda to access DynamoDB, CloudWatch, and make external API calls

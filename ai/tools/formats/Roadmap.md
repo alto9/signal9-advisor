@@ -17,7 +17,8 @@ A comprehensive project roadmap template for brainstorm mode. This template guid
 
 ## Phase Overview
 
-### Phase 1: Foundation
+(repeat for each phase)
+### Phase [Phase Number]: [Phase Title]
 - **Name**: [Phase Name]
 - **Duration**: [Estimated time in weeks/months]
 - **Priority**: [Critical/High/Medium/Low]
@@ -59,9 +60,8 @@ A comprehensive project roadmap template for brainstorm mode. This template guid
 - **Business Criteria**: [Business requirements to complete]
 - **Documentation**: [Required documentation updates]
 - **Performance Metrics**: [Required performance achievements]
+(end repeat for each phase)
 
-### Phase 2: Core Features
-[Continue with additional phases following the same format...]
 
 ## Phase Dependencies
 ```mermaid

@@ -7,7 +7,7 @@ flowchart TD
     A[EVENT: analysisNeeded<br/>EventBridge<br/>Contains: asset_symbol, analysis_id] --> B[Step Functions<br/>State Machine: AssetAnalysis<br/>Orchestrates entire analysis workflow]
     
     B --> C[Initialize Analysis<br/>State: Initialize<br/>Extracts: asset_symbol, analysis_id, timestamp]
-    C --> D[Load Asset Data<br/>State: LoadAssetData<br/>Lambda: LoadAssetData<br/>Queries: signal9_assets table<br/>Gets: symbol, name, sector, market_cap, status]
+    C --> D[Load Asset Data<br/>State: LoadAssetData<br/>Lambda: LoadAssetData<br/>Queries: assets table<br/>Gets: symbol, name, sector, market_cap, status]
     D --> E[Load Financial Data<br/>State: LoadFinancialData<br/>Lambda: LoadFinancialData<br/>Queries: companyOverview, earnings, incomeStatement,<br/>balanceSheet, cashFlow tables<br/>Gets: P/E ratios, revenue, debt, cash flow, EPS]
     E --> F[Load News Sentiment<br/>State: LoadNewsSentiment<br/>Lambda: LoadNewsSentiment<br/>Queries: signal9_news table<br/>Gets: Last 30 days sentiment scores,<br/>news articles, relevance scores]
     
@@ -17,7 +17,7 @@ flowchart TD
     H --> I[Sentiment Aggregation<br/>State: SentimentAggregation<br/>Lambda: SentimentAggregator<br/>Processes: Pre-analyzed sentiment data<br/>Calculates: Weighted sentiment score, trend analysis,<br/>relevance-weighted aggregation]
     H --> J[Financial Health<br/>State: FinancialHealth<br/>SageMaker Endpoint<br/>Analyzes: Liquidity ratios, solvency metrics,<br/>profitability indicators, cash flow stability]
     H --> K[Risk Assessment<br/>State: RiskAssessment<br/>SageMaker Endpoint<br/>Evaluates: Volatility, debt levels, market position,<br/>sector-specific risks, earnings consistency]
-    H --> L[Peer Comparison<br/>State: PeerComparison<br/>Lambda: PeerAnalyzer<br/>Queries: signal9_assets table for sector peers<br/>Compares: P/E, P/B, ROE, ROA, growth rates]
+    H --> L[Peer Comparison<br/>State: PeerComparison<br/>Lambda: PeerAnalyzer<br/>Queries: assets table for sector peers<br/>Compares: P/E, P/B, ROE, ROA, growth rates]
     
     I --> M[Wait for All<br/>State: WaitForParallel<br/>Collects results from all parallel branches]
     J --> M
@@ -74,7 +74,7 @@ flowchart TD
 
 #### **LoadAssetData Lambda**
 - **Purpose**: Retrieves basic asset information and metadata
-- **Queries**: `signal9_assets` table
+- **Queries**: `assets` table
 - **Key Data Retrieved**:
   - `symbol`: Stock ticker symbol (e.g., AAPL, MSFT)
   - `name`: Company name
@@ -147,7 +147,7 @@ flowchart TD
 
 #### **PeerAnalyzer Lambda**
 - **Purpose**: Compares asset against sector peers for competitive analysis
-- **Queries**: `signal9_assets` table for sector peers
+- **Queries**: `assets` table for sector peers
 - **Analysis Performed**:
   - **Sector Peer Identification**: Finds assets in same sector
   - **Percentile Rankings**: Calculates relative performance

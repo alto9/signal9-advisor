@@ -1,5 +1,5 @@
 {
-  "TableName": "signal9_assets",
+  "TableName": "assets",
   "Description": "Stores comprehensive asset data including fundamental analysis data and trading metadata from Alpaca API",
   "KeySchema": [
     {

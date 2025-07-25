@@ -246,7 +246,7 @@ Instead of embedding schemas in diagram files, reference them like this:
 
 ```markdown
 ## Database Schema
-See: [signal9_assets.json](../models/dynamodb/signal9_assets.json)
+See: [assets.json](../models/dynamodb/assets.json)
 ```
 
 This keeps the diagrams clean and maintainable while providing detailed model information in a centralized location. 

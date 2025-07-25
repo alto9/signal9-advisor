@@ -6,7 +6,7 @@ This diagram shows the daily scheduled job that synchronizes assets from the Alp
 flowchart TD
     A[EventBridge Rule: Daily at 4:00 AM] --> B[Lambda: SyncAssets]
     B --> C[Alpaca API: /v2/assets?status=active]
-    C --> D[DynamoDB: signal9_assets table]
+    C --> D[DynamoDB: assets table]
     D --> E[Upsert asset records]
     E --> F[Update lastSyncTimestamp]
     
@@ -45,7 +45,7 @@ flowchart TD
 1. **EventBridge Rule: Daily at 4:00 AM** - AWS EventBridge triggers the cron job daily at 4:00 AM using cron expression `0 4 * * ? *`
 2. **Lambda: SyncAssets** - AWS Lambda function (Node.js/Python) is invoked to handle the asset synchronization
 3. **Alpaca API: /v2/assets?status=active** - The Lambda function makes HTTPS calls to Alpaca's REST API to retrieve only active tradable assets
-4. **DynamoDB: signal9_assets table** - AWS DynamoDB table that stores asset information
+4. **DynamoDB: assets table** - AWS DynamoDB table that stores asset information
 5. **Upsert asset records** - Database operation that inserts new assets or updates existing ones based on asset symbol
 6. **Update lastSyncTimestamp** - Updates the sync timestamp to track when the last synchronization occurred
 
@@ -58,7 +58,7 @@ flowchart TD
 - **IAM Roles**: Permissions for Lambda to access DynamoDB and make external API calls
 
 ### DynamoDB Schema
-See: [signal9_assets.json](../../models/dynamodb/signal9_assets.json)
+See: [assets.json](../../models/dynamodb/assets.json)
 
 The table uses a single primary key (`symbol`) with a Global Secondary Index on `status` for efficient queries by asset status.
 
