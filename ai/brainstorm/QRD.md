@@ -29,7 +29,7 @@
 - **Tools and Libraries**: Jest, ts-jest, @types/jest, AWS SDK mocks
 - **Test Scope**:
   - Lambda function handlers for all 7 core functions
-  - Data validation logic for assets, earnings, and financial data
+  - Data validation logic for tickers, earnings, and news
   - API integration logic with mocked external services
   - Event processing and dispatch logic
   - Error handling and retry mechanisms
@@ -43,11 +43,11 @@
 ### **Functional Testing**
 - **Scope**: Core data collection workflows and business logic
 - **Test Cases**:
-  - Asset synchronization from Alpaca API
+  - Ticker synchronization from Polygon.io API
   - Earnings calendar synchronization from AlphaVantage
-  - Dual pollination triggers (earnings-based and age-based asset selection)
-  - News sentiment collection and filtering
-  - Asset prioritization logic for regular pollination (volume + age criteria)
+  - Dual pollination triggers (earnings-based and age-based ticker selection)
+  - News collection and filtering
+  - Ticker prioritization logic for regular pollination (volume + age criteria)
   - Data validation and error handling
   - Event processing and duplicate prevention
 - **Automation Level**: 100% automated functional tests
@@ -64,7 +64,7 @@
 - **Mock Strategy**: AWS SDK mocks, external API mocks, DynamoDB mocks
 
 ### **Test Data Management**
-- **Mock Strategy**: Use actual API response structures from `ai/brainstorm/models/` folders
+- **Mock Strategy**: Use actual API response structures from `ai/brainstorm/models/polygon/` and `ai/brainstorm/models/alphavantage/` folders
 - **Test Data Generation**: Manual API calls to collect real sample data for testing
 - **Mock Responses**: Store sample API responses as test fixtures for consistent testing
 - **Data Validation**: Test data validation logic with known good and bad data sets
@@ -119,14 +119,14 @@
 
 ### **Mock and Test Utilities**
 - **AWS SDK Mocks**: Comprehensive mocking of DynamoDB, EventBridge, Secrets Manager
-- **API Response Mocks**: Based on actual structures from `ai/brainstorm/models/alphavantage/` and `ai/brainstorm/models/alpaca/`
+- **API Response Mocks**: Based on actual structures from `ai/brainstorm/models/polygon/` and `ai/brainstorm/models/alphavantage/`
 - **Test Fixtures**: Real API response samples collected manually and stored for testing
 - **Error Simulation**: Tools for simulating API failures and error conditions
 
 ## Data Quality Assurance
 
 ### **Data Validation Testing**
-- **Asset Data Validation**:
+- **Ticker Data Validation**:
   - Symbol format validation (valid ticker symbols)
   - Required field completeness (company_name, sector, status)
   - Data type validation (strings, numbers, dates)
@@ -136,19 +136,19 @@
   - Date format validation (YYYY-MM-DD format)
   - EPS numeric validation (valid decimal numbers)
   - Report time validation (bmo/amc enum values)
-  - Symbol cross-reference validation (must exist in assets table)
+  - Symbol cross-reference validation (must exist in tickers table)
 
-- **Financial Data Validation**:
+- **Financial Statement Validation**:
   - Numeric range validation (positive values where required)
   - Date consistency validation (logical statement dates)
   - Data completeness validation (required fields present)
   - Cross-reference validation (data consistency across statements)
 
 - **News Data Validation**:
-  - Sentiment score validation (0-1 range)
-  - Relevance score validation (0-1 range)
-  - Asset association validation (valid ticker symbols)
+  - Source validation (valid news sources)
+  - Ticker association validation (valid ticker symbols)
   - Date/time format validation
+  - URL format validation
 
 ### **Error Handling Testing**
 - **API Failure Simulation**: Test behavior when external APIs are unavailable
@@ -161,7 +161,7 @@
 
 ### **Data Collection Metrics**
 - **Success Rates**:
-  - Asset sync success rate: >98%
+  - Ticker sync success rate: >98%
   - Earnings sync success rate: >98%
   - News sync success rate: >95%
   - Pollination success rate: >95%
@@ -181,14 +181,14 @@
 ### **Performance Metrics**
 - **Processing Time**: Each Lambda function completes within timeout limits
 - **API Response Time**: External API calls complete within 30 seconds
-- **Data Processing Speed**: 1 asset processed per second minimum
+- **Data Processing Speed**: 1 ticker processed per second minimum
 - **System Reliability**: >99% uptime for scheduled workflows (Monday-Saturday operations)
 - **Maintenance Window**: Sunday (all scheduled jobs disabled)
 
 ## Risk-Based Testing
 
 ### **High-Risk Areas**
-- **External API Integration**: Alpaca and AlphaVantage API dependencies
+- **External API Integration**: Polygon.io and AlphaVantage API dependencies
 - **Data Validation Logic**: Financial data accuracy and completeness
 - **Event Processing**: Event-driven workflow reliability
 - **Error Handling**: System recovery from failures
@@ -240,6 +240,6 @@
 
 ---
 
-**Document Status**: Focused on data collection system testing
+**Document Status**: Updated for hybrid Polygon.io + AlphaVantage approach
 **Testing Scope**: Unit testing with simplified integration testing
 **Quality Focus**: Data integrity, API reliability, and system monitoring 

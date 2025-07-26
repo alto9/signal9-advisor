@@ -61,10 +61,10 @@ Signal9 Data Collection System is a serverless AWS-based data ingestion and stor
 - **Key Deliverables**:
   - **AWS CDK Setup**: Infrastructure as code with TypeScript
   - **DynamoDB Tables**: Create and configure all 4 data tables with proper indexes:
-    - assets: Store tradable asset information
+    - tickers: Store tradable ticker information
     - earningsCalendar: Store earnings dates and processing status
-    - newsSentiment: Store filtered news with asset associations
-    - foundationalData: Store comprehensive financial data from AlphaVantage
+    - news: Store filtered news with ticker associations
+    - foundationalData: Store comprehensive financial data from Polygon.io
   - **Lambda Function Structure**: Implement core Lambda function deployment framework
   - **EventBridge Configuration**: Set up scheduled rules and custom event routing
   - **Secrets Management**: Configure AWS Secrets Manager for API credentials
@@ -118,40 +118,40 @@ Signal9 Data Collection System is a serverless AWS-based data ingestion and stor
 #### Business Context
 - **Business Value**: Implements core data collection capabilities from external APIs
 - **Success Metrics**: 
-  - Asset sync success rate >98%
+  - Ticker sync success rate >98%
   - Earnings sync success rate >98%
   - News sync success rate >95%
   - Data validation success rate >95%
 
 #### Technical Scope
 - **Components**: 
-  - SyncAssets Lambda function with Alpaca API integration
+  - SyncTickers Lambda function with Polygon.io API integration
   - SyncEarningsCalendar Lambda function with AlphaVantage integration
-  - SyncNewsSentiment Lambda function with hourly processing
+  - SyncNews Lambda function with hourly processing
   - Comprehensive data validation logic
   - Error handling and retry mechanisms
 - **Technical Dependencies**: 
   - Phase 1 infrastructure completion
+  - Polygon.io API access
   - AlphaVantage API access
-  - Alpaca API access
 - **Architecture Changes**: Implementation of scheduled data collection workflows
 
 #### Implementation
 - **Key Deliverables**:
-  - **Asset Sync**: Implement SyncAssets function with Alpaca API integration
+  - **Ticker Sync**: Implement SyncTickers function with Polygon.io API integration
   - **Earnings Sync**: Implement SyncEarningsCalendar function with AlphaVantage integration
-  - **News Collection**: Implement SyncNewsSentiment function with hourly processing
+  - **News Collection**: Implement SyncNews function with hourly processing
   - **Data Validation**: Implement comprehensive validation logic for all data sources
   - **Error Handling**: Implement retry logic and error recovery mechanisms
 
 - **Technical Constraints**: 
-  - API rate limits (mitigated with full AlphaVantage access)
+  - API rate limits (mitigated with full API access)
   - Lambda timeout constraints (5 minutes for data collection functions)
   - DynamoDB write capacity management
 
 - **Integration Points**:
-  - AlphaVantage API endpoints: EARNINGS_CALENDAR, NEWS_SENTIMENT
-  - Alpaca API: `/v2/assets?status=active` endpoint
+  - Polygon.io API endpoints: Tickers, News
+  - AlphaVantage API endpoint: EARNINGS_CALENDAR
   - DynamoDB tables for data storage
 
 #### Quality Assurance
@@ -190,7 +190,7 @@ Signal9 Data Collection System is a serverless AWS-based data ingestion and stor
 ## Phase 3: Event-Driven Processing
 
 #### Business Context
-- **Business Value**: Enables asset-specific comprehensive data collection through event-driven architecture
+- **Business Value**: Enables ticker-specific comprehensive data collection through event-driven architecture
 - **Success Metrics**: 
   - Event processing latency <30 seconds
   - Pollination success rate >95%
@@ -199,36 +199,38 @@ Signal9 Data Collection System is a serverless AWS-based data ingestion and stor
 #### Technical Scope
 - **Components**: 
   - TriggerEarningsPollenation and TriggerRegularPollenation Lambda functions
-  - PollenateAsset Lambda function with full AlphaVantage integration
+  - PollenateTicker Lambda function with full Polygon.io integration
   - MarkEarningsProcessed Lambda function
   - Event orchestration and dispatch logic
   - Bulk upsert operations for historical datasets
 - **Technical Dependencies**: 
   - Phase 2 data collection completion
   - EventBridge custom event configuration
-  - AlphaVantage fundamental data APIs
+  - Polygon.io fundamental data APIs
 - **Architecture Changes**: Implementation of event-driven data processing workflows
 
 #### Implementation
 - **Key Deliverables**:
   - **Pollination Triggers**: Implement TriggerEarningsPollenation and TriggerRegularPollenation
-  - **Asset Data Collection**: Implement PollenateAsset function with full AlphaVantage integration:
-    - COMPANY_OVERVIEW
-    - EARNINGS (complete historical datasets)
-    - CASH_FLOW (complete historical datasets)
-    - BALANCE_SHEET (complete historical datasets)
-    - INCOME_STATEMENT (complete historical datasets)
+  - **Ticker Data Collection**: Implement PollenateTicker function with full Polygon.io integration:
+    - Ticker Overview
+    - Quarterly Financials (complete historical datasets)
+    - Yearly Financials (complete historical datasets)
+    - Related Tickers
+    - Splits (complete historical datasets)
+    - Dividends (complete historical datasets)
+    - IPOs
   - **Event Processing**: Implement MarkEarningsProcessed function
   - **Event Orchestration**: Ensure proper event dispatch and handling
   - **Bulk Data Processing**: Complete foundational data storage with bulk upsert strategy
 
 - **Technical Constraints**: 
   - 10 minute Lambda timeout for comprehensive data processing
-  - Bulk upsert of complete historical datasets (20-50 records per financial statement type)
+  - Bulk upsert of complete historical datasets (20-50 records per financial data type)
   - EventBridge event size limitations
 
 - **Integration Points**:
-  - AlphaVantage API endpoints: OVERVIEW, EARNINGS, CASH_FLOW, BALANCE_SHEET, INCOME_STATEMENT
+  - Polygon.io API endpoints: Ticker Overview, Quarterly Financials, Yearly Financials, Related Tickers, Splits, Dividends, IPOs
   - EventBridge for pollenationNeeded and earningsProcessed events
   - DynamoDB foundational data tables
 
@@ -369,17 +371,17 @@ graph TD
 ### **Scheduled Data Collection Workflow**
 ```
 Monday-Saturday Schedule:
-4:00 AM: Asset Sync (Alpaca API) → assets Table
+4:00 AM: Ticker Sync (Polygon.io API) → tickers Table
 5:00 AM: Earnings Calendar Sync (AlphaVantage API) → earningsCalendar Table
 6:00 AM: Earnings-Triggered Pollination → pollenationNeeded Events for recent earnings
-7:00 AM: Regular Pollination → pollenationNeeded Events for high-volume, stale assets
-Hourly: News Sentiment Sync → newsSentiment Table with asset associations
+7:00 AM: Regular Pollination → pollenationNeeded Events for high-volume, stale tickers
+Hourly: News Sync → news Table with ticker associations
 
 Sunday: Maintenance Window (no scheduled jobs run)
 ```
 
 ### **Event-Driven Data Processing**
-- **pollenationNeeded Events**: Trigger comprehensive financial data collection for specific assets (from both earnings and regular triggers)
+- **pollenationNeeded Events**: Trigger comprehensive financial data collection for specific tickers (from both earnings and regular triggers)
 - **earningsProcessed Events**: Mark earnings as processed to prevent duplicate collection
 - **Dual Pollination Sources**: Events triggered by both earnings releases (6:00 AM) and regular data staleness checks (7:00 AM)
 - **Bulk Historical Data Processing**: Each pollination re-processes complete historical datasets (typically 10+ years of financial data)
@@ -395,7 +397,7 @@ Sunday: Maintenance Window (no scheduled jobs run)
   - API response times and success rates
   - Lambda execution metrics and errors
   - DynamoDB read/write capacity and throttling
-  - AlphaVantage rate limit tracking
+  - Polygon.io rate limit tracking
 - **Logging Strategy**: CloudWatch Logs for all Lambda functions, structured logging for debugging
 - **Alerting Strategy**: CloudWatch alarms for critical failures, SNS notifications for system administrators
 
@@ -403,7 +405,7 @@ Sunday: Maintenance Window (no scheduled jobs run)
 
 ### High-Level Risks
 - **Technical Risks**:
-  - Risk: External API dependencies (AlphaVantage, Alpaca outages)
+  - Risk: External API dependencies (Polygon.io, AlphaVantage outages)
   - Impact: High
   - Mitigation: Comprehensive error handling, retry logic, graceful degradation
 - **Business Risks**:
@@ -438,7 +440,7 @@ Sunday: Maintenance Window (no scheduled jobs run)
   - Impact: Ensures data relevance for future applications
 - **API Integration Success**:
   - Description: Successful data retrieval from external APIs
-  - Target: >98% success rate for Alpaca and AlphaVantage APIs
+  - Target: >98% success rate for Polygon.io and AlphaVantage APIs
   - Impact: Reliable data foundation for investment analysis
 
 ## Resource Requirements
@@ -450,8 +452,8 @@ Sunday: Maintenance Window (no scheduled jobs run)
   - Infrastructure as code (CDK)
   - Unit testing with Jest
 - **External Dependencies**: 
+  - Polygon.io API (full access)
   - AlphaVantage API (full access)
-  - Alpaca API (standard access)
   - GitHub Actions (CI/CD pipeline)
 
 ## Timeline and Milestones
@@ -462,12 +464,12 @@ Sunday: Maintenance Window (no scheduled jobs run)
 - **Buffer Time**: 20% contingency built into infrastructure setup
 
 ### **Phase 2: Data Collection Implementation (Weeks 3-4)**
-- **Major Milestones**: Asset sync, earnings sync, news collection, data validation
+- **Major Milestones**: Ticker sync, earnings sync, news collection, data validation
 - **Critical Path**: Core data collection functions must be operational before event-driven processing
 - **Buffer Time**: 15% contingency for API integration challenges
 
 ### **Phase 3: Event-Driven Processing (Weeks 5-6)**
-- **Major Milestones**: Pollination triggers, asset data collection, event orchestration
+- **Major Milestones**: Pollination triggers, ticker data collection, event orchestration
 - **Critical Path**: Event processing must be complete before testing phase
 - **Buffer Time**: 15% contingency for event coordination complexity
 
@@ -483,6 +485,6 @@ Sunday: Maintenance Window (no scheduled jobs run)
 
 ---
 
-**Document Status**: Structured according to standard roadmap format with 4 sequential phases
+**Document Status**: Updated for hybrid Polygon.io + AlphaVantage approach
 **Project Scope**: Four-phase data collection foundation (8 weeks total, 2 weeks per phase)
 **Success Criteria**: Reliable, monitored, and tested data collection infrastructure ready for future expansion

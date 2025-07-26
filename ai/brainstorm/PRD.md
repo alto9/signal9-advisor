@@ -5,10 +5,10 @@
 **Vision**: Signal9 Advisor Data Collection System is the foundational data layer for future investment analysis applications. The system focuses exclusively on collecting, storing, and maintaining high-quality financial data from external APIs to build a comprehensive database of stocks, earnings, and market sentiment information. This system serves as the data foundation that will enable future analytical and user-facing applications.
 
 **Primary Function**: Automated data collection and storage system that:
-- Synchronizes tradable stock assets from Alpaca API
+- Synchronizes tradable stock tickers from Polygon.io API
 - Maintains an up-to-date earnings calendar from AlphaVantage API
 - Collects comprehensive fundamental financial data through event-driven processing
-- Gathers hourly news sentiment data for market analysis
+- Gathers hourly news data for market analysis
 - Ensures data quality and consistency through validation and monitoring
 
 **Target Users**: 
@@ -18,36 +18,36 @@
 
 ## Core System Components
 
-### **Asset Management System**
-- **Daily Asset Synchronization (4:00 AM)**: Automated sync with Alpaca API to maintain current list of tradable stocks
-- **Asset Database**: DynamoDB table storing stock symbols, company names, sectors, and sync timestamps
-- **Data Validation**: Ensures asset data quality and completeness
-- **Change Tracking**: Monitors additions, updates, and deactivations of tradable assets
+### **Ticker Management System**
+- **Daily Ticker Synchronization (4:00 AM)**: Automated sync with Polygon.io API to maintain current list of tradable stocks
+- **Ticker Database**: DynamoDB table storing stock symbols, company names, sectors, and sync timestamps
+- **Data Validation**: Ensures ticker data quality and completeness
+- **Change Tracking**: Monitors additions, updates, and deactivations of tradable tickers
 
 ### **Earnings Calendar System**
 - **Daily Earnings Sync (5:00 AM)**: Automated sync with AlphaVantage EARNINGS_CALENDAR endpoint
 - **Earnings Database**: DynamoDB table storing upcoming and historical earnings dates, estimates, and actuals
 - **Earnings Event Processing**: Tracks when earnings are released to trigger data collection
-- **Data Validation**: Validates earnings dates, estimates, and ensures symbol matching with asset database
+- **Data Validation**: Validates earnings dates, estimates, and ensures symbol matching with ticker database
 
 ### **Event-Driven Data Collection Pipeline**
 - **Earnings-Triggered Collection (6:00 AM)**: Automatically collects fresh data for stocks that released earnings in the past 24 hours
-- **Regular Data Collection (7:00 AM)**: Identifies high-volume assets with oldest data (based on lastPollenationDate) and triggers comprehensive data refresh
+- **Regular Data Collection (7:00 AM)**: Identifies high-volume tickers with oldest data (based on lastPollenationDate) and triggers comprehensive data refresh
 - **Dual Pollination Strategy**: Two distinct triggers ensure both event-driven (earnings) and time-based (staleness) data collection
-- **pollenationNeeded Events**: Event-driven system that triggers comprehensive data collection for individual assets from both sources
+- **pollenationNeeded Events**: Event-driven system that triggers comprehensive data collection for individual tickers from Polygon.io
 - **Foundational Data Storage**: Stores complete financial dataset including:
-  - Company Overview (market cap, sector, financial ratios)
+  - Ticker Overview (market cap, sector, financial ratios)
+  - Quarterly Financials (comprehensive quarterly financial statements)
+  - Yearly Financials (comprehensive annual financial statements)
   - Earnings Data (historical and estimated earnings per share)
-  - Cash Flow Statements (operating, investing, and financing cash flows)
-  - Balance Sheet Data (assets, liabilities, shareholder equity)
-  - Income Statements (revenue, expenses, net income)
-  - Earnings Call Scripts (management commentary and guidance)
+  - Corporate Actions (splits, dividends, IPOs)
+  - Related Tickers (correlated securities)
 
-### **News Sentiment Collection System**
-- **Hourly News Sync**: Automated collection of news sentiment data from AlphaVantage
-- **Asset-Linked News**: News articles filtered and linked to relevant stock symbols
-- **Sentiment Analysis Storage**: Structured storage of news sentiment scores and market impact data
-- **Real-time Market Intelligence**: Up-to-date news data for market sentiment analysis
+### **News Collection System**
+- **Hourly News Sync**: Automated collection of news data from Polygon.io
+- **Ticker-Linked News**: News articles filtered and linked to relevant stock symbols
+- **News Analysis Storage**: Structured storage of news data with sentiment analysis and market impact information
+- **Real-time Market Intelligence**: Up-to-date news data with sentiment analysis for market intelligence
 
 ### **Data Quality and Monitoring System**
 - **Validation Pipeline**: Comprehensive data validation for all incoming financial data
@@ -61,11 +61,11 @@
 ### **Event-Driven Processing Pipeline**
 ```
 Monday-Saturday Operations:
-4:00 AM: Asset Sync (Alpaca API) → assets Table
+4:00 AM: Ticker Sync (Polygon.io API) → tickers Table
 5:00 AM: Earnings Calendar Sync (AlphaVantage API) → earningsCalendar Table
 6:00 AM: Earnings-Triggered Pollination → pollenationNeeded Events → Data Collection
 7:00 AM: Regular Pollination → pollenationNeeded Events → Data Collection
-Hourly: News Sentiment Sync → newsSentiment Table
+Hourly: News Sync → news Table
 Event-Driven: pollenationNeeded → Comprehensive Financial Data Collection
 
 Sunday: Maintenance Window (no scheduled data collection)
@@ -74,23 +74,26 @@ Sunday: Maintenance Window (no scheduled data collection)
 ### **Data Storage Strategy**
 - **Primary Storage**: DynamoDB for structured financial data with fast access patterns
 - **Data Tables**:
-  - `assets`: Stock symbols, company info, sync timestamps
+  - `tickers`: Stock symbols, company info, sync timestamps
   - `earningsCalendar`: Earnings dates, estimates, actuals, processing status
-  - `newsSentiment`: News articles, sentiment scores, asset associations
-  - `foundationalData`: Complete financial datasets (overview, earnings, statements)
+  - `news`: News articles, ticker associations, market impact data
+  - `foundationalData`: Complete financial datasets (overview, financials, corporate actions)
 - **Backup Strategy**: Automated DynamoDB backups with point-in-time recovery
 - **Data Retention**: Configurable retention policies for different data types
 
 ### **External API Integration**
-- **Alpaca API**: `/v2/assets?status=active` for tradable asset catalog
-- **AlphaVantage API**: Multiple endpoints for comprehensive financial data:
-  - EARNINGS_CALENDAR: Earnings dates and estimates
-  - COMPANY_OVERVIEW: Company fundamentals and ratios
-  - EARNINGS: Historical earnings data
-  - CASH_FLOW: Cash flow statements
-  - BALANCE_SHEET: Balance sheet data
-  - INCOME_STATEMENT: Income statement data
-  - NEWS_SENTIMENT: Market news and sentiment analysis
+- **Polygon.io API**: Multiple endpoints for comprehensive financial data:
+  - Tickers: Complete list of tradable securities
+  - Ticker Overview: Company fundamentals and financial ratios
+  - Ticker Types: Classification of securities by type
+  - Related Tickers: Correlated securities and relationships
+  - Quarterly Financials: Complete quarterly financial statements
+  - Yearly Financials: Complete annual financial statements
+  - IPOs: Initial public offering data
+  - Splits: Stock split information
+  - Dividends: Dividend payment data
+  - News: Market news with sentiment analysis
+- **AlphaVantage API**: EARNINGS_CALENDAR endpoint for earnings detection and calendar management
 - **API Management**: Full API access with optimized rate management and caching
 
 ### **Monitoring and Observability**
@@ -101,39 +104,39 @@ Sunday: Maintenance Window (no scheduled data collection)
 
 ## Data Collection Workflows
 
-### **Asset Synchronization Workflow**
+### **Ticker Synchronization Workflow**
 1. **EventBridge Trigger**: Daily at 4:00 AM
-2. **Lambda Execution**: SyncAssets function queries Alpaca API
-3. **Data Processing**: Validates and upserts asset records
+2. **Lambda Execution**: SyncTickers function queries Polygon.io Tickers endpoint
+3. **Data Processing**: Validates and upserts ticker records
 4. **Status Updates**: Updates sync timestamps and emits metrics
 
 ### **Earnings Processing Workflow**
-1. **Calendar Sync**: Daily at 5:00 AM, updates earnings calendar
+1. **Calendar Sync**: Daily at 5:00 AM, updates earnings calendar from AlphaVantage
 2. **Earnings Detection**: Daily at 6:00 AM, identifies recent earnings releases
-3. **Event Dispatch**: Triggers pollenationNeeded events for assets with recent earnings
-4. **Data Collection**: Comprehensive financial data collection for earnings-triggered assets
+3. **Event Dispatch**: Triggers pollenationNeeded events for tickers with recent earnings
+4. **Data Collection**: Comprehensive financial data collection for earnings-triggered tickers
 
 ### **Regular Data Refresh Workflow**
-1. **Asset Prioritization**: Daily at 7:00 AM, queries assets table for assets with highest volume + oldest lastPollenationDate
-2. **Selection Criteria**: Prioritizes assets based on trading volume and data age (e.g., high-volume stocks with data >7 days old)
-3. **Event Dispatch**: Triggers pollenationNeeded events for selected high-priority assets
-4. **Data Collection**: Updates fundamental data for selected assets, ensuring fresh data for actively traded securities
+1. **Ticker Prioritization**: Daily at 7:00 AM, queries tickers table for tickers with highest volume + oldest lastPollenationDate
+2. **Selection Criteria**: Prioritizes tickers based on trading volume and data age (e.g., high-volume stocks with data >7 days old)
+3. **Event Dispatch**: Triggers pollenationNeeded events for selected high-priority tickers
+4. **Data Collection**: Updates fundamental data for selected tickers, ensuring fresh data for actively traded securities
 
 ### **pollenationNeeded Event Processing**
-1. **Event Receipt**: Lambda function receives pollenationNeeded event with asset symbol
-2. **Complete Dataset Retrieval**: Sequential calls to AlphaVantage endpoints - **each returns complete historical datasets** (typically 10+ years)
-3. **Bulk Data Processing**: Process complete historical datasets (20-50 records per financial statement type)
+1. **Event Receipt**: Lambda function receives pollenationNeeded event with ticker symbol
+2. **Complete Dataset Retrieval**: Sequential calls to Polygon.io endpoints - **each returns complete historical datasets** (typically 10+ years)
+3. **Bulk Data Processing**: Process complete historical datasets (20-50 records per financial data type)
 4. **Data Validation**: Validates all incoming financial data
 5. **Bulk Upsert Operations**: **Upserts ALL historical records** (both new and existing data for maximum accuracy)
 6. **Monitoring**: Emits success/failure metrics and logs
 
 **Key Architecture**: Each pollination re-processes complete historical datasets, ensuring data accuracy and automatic gap-filling.
 
-### **News Sentiment Collection Workflow**
+### **News Collection Workflow**
 1. **Hourly Trigger**: EventBridge triggers news collection every hour
-2. **API Query**: Retrieves news sentiment data for the past 2 hours
-3. **Asset Matching**: Filters news to only include articles mentioning tracked assets
-4. **Storage**: Stores filtered news with asset associations and sentiment scores
+2. **API Query**: Retrieves news data for the past 2 hours
+3. **Ticker Matching**: Filters news to only include articles mentioning tracked tickers
+4. **Storage**: Stores filtered news with ticker associations and market impact data
 
 ## Success Metrics
 
@@ -151,9 +154,9 @@ Sunday: Maintenance Window (no scheduled data collection)
 - Maintenance window: Sunday (no data collection operations)
 
 ### **Data Coverage Metrics**
-- Active asset coverage: 100% of Alpaca-listed active assets
-- Earnings calendar coverage: All upcoming earnings for tracked assets
-- News sentiment coverage: All relevant news articles from AlphaVantage
+- Active ticker coverage: 100% of Polygon.io-listed active tickers
+- Earnings calendar coverage: All upcoming earnings for tracked tickers
+- News coverage: All relevant news articles from Polygon.io
 - Fundamental data completeness: >90% for all required data fields
 
 ## Future Expansion Foundation
@@ -173,7 +176,7 @@ The system architecture prioritizes:
 
 ---
 
-**Document Status**: Reset for data collection focus
+**Document Status**: Updated for hybrid Polygon.io + AlphaVantage approach
 **Scope**: Data collection and storage only - no user-facing features
 **Next Phase**: Future applications will build upon this data foundation
 
