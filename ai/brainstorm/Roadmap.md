@@ -69,6 +69,7 @@ Signal9 Data Collection System is a serverless AWS-based data ingestion and stor
   - **EventBridge Configuration**: Set up scheduled rules and custom event routing
   - **Secrets Management**: Configure AWS Secrets Manager for API credentials
   - **Basic Monitoring**: CloudWatch logging and basic metrics
+  - **Signal9 Ingestion Dashboard Foundation**: Set up CloudWatch dashboard structure with placeholder widgets for future metrics
 
 - **Technical Constraints**: 
   - Monday-Saturday scheduling requirements
@@ -143,6 +144,7 @@ Signal9 Data Collection System is a serverless AWS-based data ingestion and stor
   - **News Collection**: Implement SyncNews function with hourly processing
   - **Data Validation**: Implement comprehensive validation logic for all data sources
   - **Error Handling**: Implement retry logic and error recovery mechanisms
+  - **Dashboard Metrics**: Implement CloudWatch metrics for data collection functions and begin populating dashboard widgets
 
 - **Technical Constraints**: 
   - API rate limits (mitigated with full API access)
@@ -223,6 +225,7 @@ Signal9 Data Collection System is a serverless AWS-based data ingestion and stor
   - **Event Processing**: Implement MarkEarningsProcessed function
   - **Event Orchestration**: Ensure proper event dispatch and handling
   - **Bulk Data Processing**: Complete foundational data storage with bulk upsert strategy
+  - **Dashboard Enhancement**: Add event processing metrics and data volume tracking to dashboard
 
 - **Technical Constraints**: 
   - 10 minute Lambda timeout for comprehensive data processing
@@ -294,6 +297,11 @@ Signal9 Data Collection System is a serverless AWS-based data ingestion and stor
   - **Unit Testing**: Comprehensive test suite with >80% coverage
   - **GitHub Actions Setup**: Configure CI/CD pipeline with CDK CLI deployment
   - **Tag-based Deployment**: Implement production deployment strategy with rollback capability
+  - **Signal9 Ingestion Dashboard Completion**: Finalize comprehensive CloudWatch dashboard with:
+    - All ingestion function metrics and error tracking
+    - Data processing volume and efficiency metrics
+    - Real-time cost monitoring and estimation
+    - System health indicators and alerting
   - **Monitoring Enhancement**: Advanced CloudWatch dashboards and alerting
   - **Maintenance Window**: Configure Sunday maintenance window (disable scheduled jobs)
   - **Documentation**: Complete system documentation and operational procedures

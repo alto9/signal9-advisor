@@ -1,6 +1,6 @@
 # Daily Sync Tickers Cron Job
 
-This diagram shows the daily scheduled job that synchronizes tickers from the Polygon.io API with the Signal9 tickers table using AWS EventBridge, Lambda, and DynamoDB. The process handles paginated responses from Polygon.io to retrieve all available tickers.
+This diagram shows the daily scheduled job that synchronizes tickers from the Polygon.io API with the Signal9 tickers table using AWS EventBridge, Lambda, and DynamoDB. The process handles paginated responses from Polygon.io to retrieve all available tickers. This pagination pattern is common across many Polygon.io endpoints.
 
 ```mermaid
 flowchart TD
@@ -67,7 +67,7 @@ flowchart TD
 - **Lambda Function**: Serverless compute for API calls and database operations
 - **DynamoDB Table**: NoSQL database for ticker storage
 - **IAM Roles**: Permissions for Lambda to access DynamoDB and make external API calls
-- **Secrets Manager**: Stores Polygon.io API credentials
+- **Secrets Manager**: Stores Signal9APICredentials secret containing all API keys
 
 ### DynamoDB Schema
 See: [tickers.json](../../models/dynamodb/tickers.json)
@@ -97,9 +97,10 @@ The table uses a single primary key (`symbol`) with Global Secondary Indexes on 
 - Pagination error recovery (resume from last successful page)
 
 ### Rate Limiting Strategy
-- Polygon.io rate limits: 25 calls per minute
+- Polygon.io rate limits: Unlimited API calls with 25 calls per minute rate limit
 - Implementation includes exponential backoff (1s, 2s, 4s, 8s)
 - Maximum 3 retries per request
+- All API calls require Bearer token authentication
 - Circuit breaker pattern to prevent cascading failures
 - **Pagination Considerations**: Each page request counts against rate limit
 
@@ -108,7 +109,7 @@ The table uses a single primary key (`symbol`) with Global Secondary Indexes on 
 - **Memory**: 1024 MB (sufficient for batch processing)
 - **Concurrency**: 1 (to avoid rate limit conflicts)
 - **Environment Variables**: 
-  - `POLYGON_API_KEY`: API key from Secrets Manager
+  - `SIGNAL9_API_CREDENTIALS_SECRET_NAME`: Name of the secret in AWS Secrets Manager
   - `TICKERS_TABLE_NAME`: DynamoDB table name
   - `MAX_PAGES`: Safety limit for pagination (e.g., 1000)
 

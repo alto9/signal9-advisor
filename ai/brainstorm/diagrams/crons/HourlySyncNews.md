@@ -70,7 +70,7 @@ flowchart TD
 - **Lambda Function**: Serverless compute for API calls and database operations
 - **DynamoDB Table**: NoSQL database for news storage
 - **IAM Roles**: Permissions for Lambda to access DynamoDB and make external API calls
-- **Secrets Manager**: Stores Polygon.io API credentials
+- **Secrets Manager**: Stores Signal9APICredentials secret containing all API keys
 
 ### DynamoDB Schema
 See: [news.json](../../models/dynamodb/news.json)
@@ -86,7 +86,7 @@ The table uses a composite primary key with `news_id` as the partition key and `
 - Sentiment data validation and fallback handling
 
 ### Rate Limiting Strategy
-- Polygon.io rate limits: 25 calls per minute
+- Polygon.io rate limits: Unlimited API calls with 25 calls per minute rate limit
 - Implementation includes exponential backoff (1s, 2s, 4s, 8s)
 - Maximum 3 retries per request
 - Circuit breaker pattern to prevent cascading failures
@@ -95,7 +95,7 @@ The table uses a composite primary key with `news_id` as the partition key and `
 - **Timeout**: 5 minutes (sufficient for hourly news sync)
 - **Memory**: 512 MB (adequate for news processing)
 - **Environment Variables**: 
-  - `POLYGON_API_KEY`: API key from Secrets Manager
+  - `SIGNAL9_API_CREDENTIALS_SECRET_NAME`: Name of the secret in AWS Secrets Manager
   - `NEWS_TABLE_NAME`: DynamoDB table name
   - `TRACKED_TICKERS`: Comma-separated list of tickers to filter for
 
@@ -104,6 +104,7 @@ The table uses a composite primary key with `news_id` as the partition key and `
 - This job runs hourly to ensure fresh news data is available for market analysis
 - The process includes sentiment analysis provided by Polygon.io, eliminating the need for separate sentiment processing
 - **API-Driven Sentiment**: Uses Polygon.io's built-in sentiment analysis for accurate market sentiment scoring
+- **Bearer Token Authentication**: All API calls require Bearer token in Authorization header
 - **Ticker Filtering**: Only stores news articles that mention tracked tickers to maintain relevance
 - **Sentiment Integration**: Sentiment scores and labels are directly available from Polygon.io's API response
 - The Lambda function implements proper error handling, logging, and monitoring for production use

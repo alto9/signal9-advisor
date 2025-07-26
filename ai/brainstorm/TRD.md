@@ -143,11 +143,13 @@
   - Query active tickers for processing (GSI 1)
 
 #### **earningsCalendar Table**
-- **Primary Key**: ticker_symbol (String)
-- **Sort Key**: earnings_date (String)
-- **Attributes**: report_time, estimated_eps, actual_eps, surprise, surprise_percentage, is_processed, created_at, updated_at
-- **GSI**: earnings_date-index for querying upcoming earnings
-- **Purpose**: Store earnings calendar information and processing status
+- **Primary Key**: symbol (String) - from AlphaVantage CSV
+- **Sort Key**: reportDate (String) - from AlphaVantage CSV
+- **Attributes**: name, fiscalDateEnding, estimate, currency, is_processed, created_at, updated_at
+- **GSI**: reportDate-index for querying upcoming earnings
+- **Purpose**: Store current earnings calendar snapshot (refreshed daily)
+- **CSV Mapping**: Direct mapping from AlphaVantage CSV response fields
+- **Data Strategy**: Complete refresh daily - replace all records with current calendar data
 
 #### **news Table**
 - **Primary Key**: news_id (String) - unique identifier from Polygon.io
@@ -160,16 +162,18 @@
 
 #### **foundationalData Tables**
 - **tickerOverview**: symbol (PK), last_updated (SK) for ticker fundamental data and financial ratios
-- **quarterlyFinancials**: symbol (PK), fiscal_date_ending (SK) for quarterly financial statements
-- **yearlyFinancials**: symbol (PK), fiscal_date_ending (SK) for yearly financial statements
-- **splits**: symbol (PK), split_date (SK) for stock split data
-- **dividends**: symbol (PK), dividend_date (SK) for dividend payment data
-- **ipos**: symbol (PK), ipo_date (SK) for initial public offering data
-- **relatedTickers**: symbol (PK), related_symbol (SK) for correlated securities
+- **quarterlyFinancials**: symbol (PK), end_date (SK) for quarterly financial statements with comprehensive financial data
+- **yearlyFinancials**: symbol (PK), end_date (SK) for yearly financial statements with comprehensive financial data
+- **splits**: symbol (PK), execution_date (SK) for stock split data with split_from, split_to, and unique id
+- **dividends**: symbol (PK), pay_date (SK) for dividend payment data with cash_amount, currency, declaration_date, dividend_type, ex_dividend_date, frequency, record_date, and unique id
+- **ipos**: symbol (PK), listing_date (SK) for initial public offering data with issuer_name, currency_code, offer details (max_shares_offered, price_range, total_offer_size), primary_exchange, shares_outstanding, security_type, and ipo_status
+- **relatedTickers**: symbol (PK), related_symbol (SK) for correlated securities with simple ticker-to-ticker relationship mapping
+- **earningsCallTranscripts**: symbol (PK), quarter (SK) for earnings call transcripts with speaker sentiment
 - **Common Access Pattern**: Query by symbol for latest data, sort by date for historical analysis
 - **Data Retention**: Indefinite retention for comprehensive historical analysis
 - **Write Pattern**: **Bulk upsert operations** during pollination (20-50 records per ticker per table)
 - **Upsert Strategy**: Each pollination **re-upserts complete historical datasets** from Polygon.io (all years of data)
+- **Financial Data Structure**: Each financial record includes start_date, end_date, timeframe, fiscal_period, fiscal_year, and comprehensive financial metrics (income statement, balance sheet, cash flow statement, comprehensive income) with values, units, labels, and order fields
 
 ### **Data Validation Strategy**
 - **Ticker Data**: Symbol format validation, required field completeness, status validation
@@ -180,8 +184,7 @@
 ## External API Integration
 
 ### **Polygon.io API Integration**
-- **Full API Access**: No rate limit constraints with premium API access
-- **Rate Limit Monitoring**: Track rate limit headers with custom CloudWatch metrics
+- **Access Level**: All US Stocks Tickers, Unlimited API Calls, 5 Years Historical Data, 100% Market Coverage, 15-minute Delayed Data
 - **Endpoints Used**:
   - Tickers: Complete list of tradable securities
   - Ticker Overview: Company fundamentals and financial ratios
@@ -193,29 +196,40 @@
   - Splits: Stock split information
   - Dividends: Dividend payment data
   - News: Market news with sentiment analysis
-- **Authentication**: API key stored in AWS Secrets Manager
+- **Authentication**: Bearer token stored in AWS Secrets Manager (`POLYGON_API_KEY`), required for all endpoints including logos
+- **Rate Limits**: Unlimited API calls with 25 calls per minute rate limit, exponential backoff and retry logic
+- **Data Coverage**: 100% US market coverage with 5 years of historical data
+- **Data Freshness**: 15-minute delayed data for all US stocks
 - **Error Handling**: Exponential backoff (2s, 4s, 8s), max 3 retries, data validation
-- **Rate Limits**: 25 calls per minute
+- **API Wrapper**: Internal wrapper class to avoid REST calls scattered throughout code
+- **Standard HTTP Status Codes**: 300s for redirects, 400s for client issues, 500s for server issues
 - **Rate Limit Metrics**: 
   - `PolygonRateLimit` (remaining calls per minute)
   - `PolygonRateLimitReset` (seconds until rate limit reset)
   - `PolygonAPICallsUsed` (calls used in current period)
-- **Pagination**: All endpoints support pagination with `next_url` parameter
+- **Pagination**: Many endpoints return paged results with `next_url` parameter and `count` field
 
 ### **AlphaVantage API Integration**
-- **Endpoint**: EARNINGS_CALENDAR for earnings detection and calendar management
-- **Purpose**: Retrieve upcoming earnings dates, estimates, and actuals
-- **Rate Limits**: Single daily call (very safe, no rate limiting concerns)
-- **Authentication**: API key stored in AWS Secrets Manager
+- **EARNINGS_CALENDAR Endpoint**: For earnings detection and calendar management
+  - **URL Format**: `{{ALPHA_VANTAGE_API_HOST}}/query?function=EARNINGS_CALENDAR&apikey={{ALPHA_VANTAGE_API_KEY}}`
+  - **Response Format**: CSV with headers: symbol,name,reportDate,fiscalDateEnding,estimate,currency
+  - **Purpose**: Retrieve upcoming earnings dates, estimates, and actuals
+  - **Rate Limits**: Single daily call (very safe, no rate limiting concerns)
+- **EARNINGS_CALL_TRANSCRIPT Endpoint**: For earnings call transcripts with sentiment analysis
+  - **URL Format**: `{{ALPHA_VANTAGE_API_HOST}}/query?function=EARNINGS_CALL_TRANSCRIPT&symbol={{TICKER}}&quarter={{QUARTER}}&apikey={{ALPHA_VANTAGE_API_KEY}}`
+  - **Response Format**: JSON with symbol, quarter, and transcript array (speaker, title, content, sentiment)
+  - **Purpose**: Retrieve most recent earnings call transcript with speaker sentiment analysis
+  - **Rate Limits**: One call per ticker per pollenation (very safe, no rate limiting concerns)
+- **Authentication**: API key stored in AWS Secrets Manager (`ALPHA_VANTAGE_API_KEY`) as query parameter for both endpoints
 - **Error Handling**: Exponential backoff (1s, 2s, 4s), max 3 retries, circuit breaker pattern
-- **Rate Limit Metrics**: Not required (single daily call)
+- **Rate Limit Metrics**: Not required (low call volume)
 
 ## Event Architecture
 
 ### **EventBridge Rules (Scheduled)**
 - **TickerSyncRule**: `0 4 * * 1-6 *` (Daily at 4:00 AM, Monday-Saturday)
-- **EarningsCalendarSyncRule**: `0 5 * * 1-6 *` (Daily at 5:00 AM, Monday-Saturday)
-- **EarningsPollenationRule**: `0 6 * * 1-6 *` (Daily at 6:00 AM, Monday-Saturday)
+- **EarningsPollenationRule**: `0 5 * * 1-6 *` (Daily at 5:00 AM, Monday-Saturday)
+- **EarningsCalendarSyncRule**: `0 6 * * 1-6 *` (Daily at 6:00 AM, Monday-Saturday)
 - **RegularPollenationRule**: `0 7 * * 1-6 *` (Daily at 7:00 AM, Monday-Saturday)
 - **NewsSyncRule**: `0 * * * 1-6 *` (Hourly, Monday-Saturday)
 
@@ -226,6 +240,32 @@
 - **earningsProcessed**: Marks earnings as processed to prevent duplicates
 
 ## Monitoring and Observability
+
+### **Signal9 Ingestion Dashboard**
+- **Dashboard Components**:
+  - **Ingestion Function Metrics Widgets**:
+    - Success/failure rates for all 7 Lambda functions
+    - Processing times and throughput metrics
+    - Function invocation counts and error rates
+  - **Data Processing Volume Widgets**:
+    - Records processed per function (tickers, earnings, news, financial data)
+    - Data size metrics (MB/GB processed)
+    - Processing efficiency (records per second)
+  - **Error Tracking Widgets**:
+    - Real-time error rates by function and error type
+    - API failure tracking (Polygon.io, AlphaVantage)
+    - Validation error monitoring
+    - System error alerts and trends
+  - **Cost Monitoring Widgets**:
+    - Estimated monthly costs for Lambda functions
+    - DynamoDB read/write capacity costs
+    - EventBridge and CloudWatch costs
+    - Total estimated monthly AWS spend
+  - **System Health Indicators**:
+    - Real-time status of all system components
+    - Data freshness indicators (last sync times)
+    - API health status (Polygon.io, AlphaVantage)
+    - Overall system health score
 
 ### **CloudWatch Metrics**
 - **Data Collection Metrics**:
@@ -244,6 +284,12 @@
   - `DataCompleteness` (Percentage)
   - `DataFreshness` (Age in hours)
 
+- **Cost Metrics**:
+  - `LambdaCost` (Estimated monthly cost)
+  - `DynamoDBCost` (Estimated monthly cost)
+  - `EventBridgeCost` (Estimated monthly cost)
+  - `TotalEstimatedCost` (Monthly AWS spend)
+
 ### **CloudWatch Alarms**
 - Processing failure rate > 5%
 - API error rate > 3%
@@ -260,9 +306,15 @@
 ## Security and Secrets Management
 
 ### **AWS Secrets Manager**
-- **PolygonCredentials**: API key for Polygon.io integration
-- **AlphaVantageCredentials**: API key for AlphaVantage integration
-- **Access Pattern**: Lambda functions retrieve credentials at runtime
+- **Signal9APICredentials**: Single secret containing all API credentials
+  - `POLYGON_API_HOST`: Polygon.io API host URL
+  - `POLYGON_API_KEY`: Bearer token for Polygon.io authentication
+  - `ALPHA_VANTAGE_API_HOST`: AlphaVantage API host URL
+  - `ALPHA_VANTAGE_API_KEY`: API key for AlphaVantage authentication
+- **Access Pattern**: Lambda functions retrieve the single secret at runtime
+- **Authentication Methods**:
+  - Polygon.io: Bearer token in Authorization header
+  - AlphaVantage: API key as query parameter in URLs
 - **Rotation**: No automated rotation planned initially (manual rotation as needed)
 
 ### **IAM Roles and Policies**

@@ -52,7 +52,12 @@
 ### **Data Quality and Monitoring System**
 - **Validation Pipeline**: Comprehensive data validation for all incoming financial data
 - **Error Handling**: Robust error handling with retry logic and dead letter queues
-- **Monitoring Dashboard**: CloudWatch metrics and alerts for system health
+- **Signal9 Ingestion Dashboard**: Comprehensive CloudWatch dashboard for system health monitoring including:
+  - Ingestion function call metrics (success/failure rates, processing times)
+  - Data processing volume metrics (records processed, data size)
+  - Error tracking and alerting (API failures, validation errors, system errors)
+  - Estimated monthly costs for all AWS resources
+  - Real-time system health indicators
 - **Data Freshness Tracking**: Monitoring of data age and update frequencies
 - **API Rate Management**: Efficient management of external API calls and rate limits
 
@@ -62,8 +67,8 @@
 ```
 Monday-Saturday Operations:
 4:00 AM: Ticker Sync (Polygon.io API) → tickers Table
-5:00 AM: Earnings Calendar Sync (AlphaVantage API) → earningsCalendar Table
-6:00 AM: Earnings-Triggered Pollination → pollenationNeeded Events → Data Collection
+5:00 AM: Earnings-Triggered Pollination → pollenationNeeded Events → Data Collection
+6:00 AM: Earnings Calendar Sync (AlphaVantage API) → earningsCalendar Table
 7:00 AM: Regular Pollination → pollenationNeeded Events → Data Collection
 Hourly: News Sync → news Table
 Event-Driven: pollenationNeeded → Comprehensive Financial Data Collection
@@ -75,7 +80,7 @@ Sunday: Maintenance Window (no scheduled data collection)
 - **Primary Storage**: DynamoDB for structured financial data with fast access patterns
 - **Data Tables**:
   - `tickers`: Stock symbols, company info, sync timestamps
-  - `earningsCalendar`: Earnings dates, estimates, actuals, processing status
+  - `earningsCalendar`: Current earnings calendar snapshot (refreshed daily)
   - `news`: News articles, ticker associations, market impact data
   - `foundationalData`: Complete financial datasets (overview, financials, corporate actions)
 - **Backup Strategy**: Automated DynamoDB backups with point-in-time recovery
@@ -97,6 +102,12 @@ Sunday: Maintenance Window (no scheduled data collection)
 - **API Management**: Full API access with optimized rate management and caching
 
 ### **Monitoring and Observability**
+- **Signal9 Ingestion Dashboard**: Comprehensive CloudWatch dashboard providing:
+  - **Ingestion Function Metrics**: Success/failure rates, processing times, and throughput for all Lambda functions
+  - **Data Processing Volume**: Records processed per function, data size metrics, and processing efficiency
+  - **Error Tracking**: Real-time error rates, API failure tracking, validation error monitoring, and system error alerts
+  - **Cost Monitoring**: Estimated monthly costs for Lambda, DynamoDB, EventBridge, and other AWS resources
+  - **System Health Indicators**: Real-time status of all system components, data freshness, and API health
 - **CloudWatch Metrics**: Custom metrics for data collection success rates, processing times, and error rates
 - **Alerting System**: Automated alerts for system failures, data quality issues, and API problems
 - **Logging**: Structured logging with correlation IDs for troubleshooting and auditing
@@ -111,10 +122,10 @@ Sunday: Maintenance Window (no scheduled data collection)
 4. **Status Updates**: Updates sync timestamps and emits metrics
 
 ### **Earnings Processing Workflow**
-1. **Calendar Sync**: Daily at 5:00 AM, updates earnings calendar from AlphaVantage
-2. **Earnings Detection**: Daily at 6:00 AM, identifies recent earnings releases
-3. **Event Dispatch**: Triggers pollenationNeeded events for tickers with recent earnings
-4. **Data Collection**: Comprehensive financial data collection for earnings-triggered tickers
+1. **Earnings Detection**: Daily at 5:00 AM, identifies recent earnings releases from current calendar
+2. **Event Dispatch**: Triggers pollenationNeeded events for tickers with recent earnings
+3. **Data Collection**: Comprehensive financial data collection for earnings-triggered tickers
+4. **Calendar Sync**: Daily at 6:00 AM, completely refreshes earnings calendar from AlphaVantage (replaces all existing records)
 
 ### **Regular Data Refresh Workflow**
 1. **Ticker Prioritization**: Daily at 7:00 AM, queries tickers table for tickers with highest volume + oldest lastPollenationDate

@@ -32,7 +32,7 @@ This file serves as a central repository for all relevant context that will be n
 - **DynamoDB**: Database design patterns for financial data storage with appropriate indexing strategies
 - **Lambda Functions**: Serverless compute for data collection and processing workflows
 - **EventBridge**: Event-driven architecture for scheduled triggers and custom events
-- **CloudWatch**: Monitoring, metrics, and alerting for system observability
+- **CloudWatch**: Monitoring, metrics, and alerting for system observability including Signal9 Ingestion Dashboard
 - **Secrets Manager**: Secure storage and rotation of API credentials
 
 ### System Architecture Context
@@ -46,6 +46,7 @@ This file serves as a central repository for all relevant context that will be n
 - **Data Validation**: Patterns for validating financial data from external APIs
 - **Error Handling**: Retry logic and error recovery patterns for external API integration
 - **Monitoring Patterns**: CloudWatch metrics and alerting strategies for data collection systems
+- **Signal9 Ingestion Dashboard**: Comprehensive monitoring dashboard for system health, cost tracking, and operational insights
 
 ### Financial Data Context
 - **Ticker Types**: Focus on US equity markets, excluding fixed income and derivatives
@@ -74,6 +75,7 @@ This file serves as a central repository for all relevant context that will be n
 - **Data Recovery**: Full datasets from vendors rebuild automatically through regular pollination
 - **API Management**: No health monitoring initially, reactive handling of contract changes, no automated key rotation
 - **Monitoring**: Production monitoring with Polygon.io rate limit tracking via CloudWatch metrics
+- **Signal9 Ingestion Dashboard**: Real-time system health monitoring, cost tracking, and operational insights
 - **Troubleshooting**: Operational procedures for diagnosing and resolving data collection issues
 - **Capacity Planning**: Resource sizing for Lambda functions and DynamoDB tables
 - **Cost Optimization**: Strategies for managing AWS costs and API usage across both providers
@@ -97,8 +99,8 @@ This file serves as a central repository for all relevant context that will be n
 - **Data Retention**: Indefinite retention across all tables for comprehensive historical analysis
 
 ### Integration Context
-- **Full API Access**: Polygon.io premium access with 25 calls per minute rate limit
-- **Earnings Calendar**: AlphaVantage EARNINGS_CALENDAR endpoint for earnings detection
+- **Full API Access**: Polygon.io premium access with 25 calls per minute rate limit, Bearer token authentication
+- **Earnings Calendar**: AlphaVantage EARNINGS_CALENDAR endpoint for earnings detection (CSV format)
 - **Ticker Filtering**: Focus on active tradable tickers from Polygon.io catalog
 - **News Filtering**: Ticker-specific news filtering based on ticker mentions
 - **Data Consistency**: Cross-reference validation between related datasets
