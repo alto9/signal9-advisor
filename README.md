@@ -13,7 +13,7 @@ The infrastructure consists of:
 
 ## Prerequisites
 
-- Node.js v18+ installed
+- Node.js v22+ installed
 - AWS CLI configured with appropriate credentials
 - AWS CDK CLI installed globally: `npm install -g aws-cdk`
 - AWS account with sufficient permissions for resource creation

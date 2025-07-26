@@ -35,7 +35,7 @@ Initialize the AWS CDK project structure with TypeScript, create the basic direc
 #### Dependencies
 - **Prerequisites**:
   - AWS account access and permissions
-  - Node.js v18+ and npm installed
+  - Node.js v22+ and npm installed
   - AWS CDK CLI installed globally
 - **Dependent Tickets**:
   - Ticket 1.1.2: Environment Configuration Setup
